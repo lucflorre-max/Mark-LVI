@@ -5,15 +5,16 @@ Regra do CLAUDE.md: nada que envie mensagem, altere agenda, mude prioridade ou
 execute comando/arquivo/navegador no PC roda sem confirmação do usuário.
 
 O Mark só confirma desligar, reiniciar e Wi-Fi (auditoria, achado 2). Esta
-lista cobre as outras ações do Mark. Ela é lida pelo portão em
-jarvis/brain/gate.py, chamado no despacho de ações do main.py.
+lista cobre as outras ações do Mark e as do JARVIS. Ela é lida pelo portão em
+jarvis/brain/gate.py, chamado no despacho de ações do main.py e pelo serviço
+de tarefas.
 
-Como ler a tabela:
-    ALL               — toda chamada da ferramenta pede confirmação.
-    frozenset({...})  — só as sub-ações listadas (parâmetro `action`/`mode`).
-Ferramenta fora da tabela: roda direto.
+Três níveis (`nivel()`):
+    DIRETO  — ferramenta fora das tabelas, ou sub-ação em _SAFE.
+    VOZ     — sub-ação em _VOZ: espera um "sim" falado.
+    CLIQUE  — ferramenta em _ALWAYS, ou qualquer outra sub-ação: banner.
 
-Sub-ação ausente ou desconhecida numa ferramenta parcial conta como perigosa.
+Sub-ação ausente ou desconhecida numa ferramenta parcial vai para o CLIQUE.
 O modelo pode omitir ou inventar o nome da ação, e na dúvida o portão pergunta.
 """
 
@@ -59,6 +60,24 @@ _SAFE: dict[str, frozenset[str]] = {
     # Uma ação nova que não estiver aqui pede CONFIRM até ser classificada.
     "jarvis_tarefas": frozenset({"criar", "listar_hoje", "concluir", "desfazer"}),
 }
+
+# Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
+# em 23/10/2026: digitar, teclar e clicar sem tocar no mouse). O portão
+# confere a transcrição da fala; o modelo não consegue forjar esse "sim".
+# Mensagem, apagar arquivo, navegador e código continuam no clique.
+_VOZ: dict[str, frozenset[str]] = {
+    "computer_control": frozenset({
+        "type", "smart_type", "click", "double_click", "right_click",
+        "hotkey", "press", "paste", "clear_field", "screen_click", "close_app",
+    }),
+    "computer_settings": frozenset({
+        "type_text", "enter", "escape", "press_key", "paste", "cut", "save",
+        "undo", "redo", "select_all", "close_window", "close_tab",
+        "refresh_page", "go_back", "go_forward", "task_manager", "file_explorer",
+    }),
+}
+
+DIRETO, VOZ, CLIQUE = "direto", "voz", "clique"
 
 # Sub-ação usada quando o modelo não manda nenhuma.
 _DEFAULT_ACTION = {
@@ -112,15 +131,24 @@ def sub_action(args: dict) -> str:
     return str(raw).strip().lower()
 
 
-def requires_confirm(name: str, args: dict | None) -> bool:
-    """True quando a chamada `name(args)` precisa do clique em CONFIRM."""
+def nivel(name: str, args: dict | None) -> str:
+    """DIRETO (roda já), VOZ (espera um "sim" falado) ou CLIQUE (banner)."""
     if name in _ALWAYS:
-        return True
+        return CLIQUE
     safe = _SAFE.get(name)
     if safe is None:
-        return False
+        return DIRETO
     action = sub_action(args or {}) or _DEFAULT_ACTION.get(name, "")
-    return action not in safe
+    if action in safe:
+        return DIRETO
+    if action in _VOZ.get(name, ()):
+        return VOZ
+    return CLIQUE
+
+
+def requires_confirm(name: str, args: dict | None) -> bool:
+    """True quando a chamada `name(args)` precisa de alguma confirmação."""
+    return nivel(name, args) != DIRETO
 
 
 def describe(name: str, args: dict | None, limit: int = 160) -> tuple[str, str]:

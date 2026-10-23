@@ -19,7 +19,10 @@ Objetivo central: **reduzir atrito, não criar mais trabalho.** A pergunta que o
 
 ## Regras de segurança
 
-- Nada que **envie mensagem, altere agenda, mude prioridade ou execute comando/arquivo/navegador no PC** roda sem confirmação do usuário. Reaproveite `core/confirm.py`.
+- Nada que **envie mensagem, altere agenda, mude prioridade ou execute comando/arquivo/navegador no PC** roda sem confirmação do usuário. A política fica em `jarvis/brain/policy.py`, com três níveis:
+  - **Clique** (banner de `core/confirm.py`): enviar mensagem, agenda, navegador, apagar ou sobrescrever arquivo, área de trabalho, executar código.
+  - **"Sim" por voz** (decisão do usuário em 23/10/2026): digitar, teclar, clicar e fechar apps. O "sim" vem da transcrição do microfone (`jarvis/brain/gate.py`), nunca de um parâmetro que o modelo preenche.
+  - **Direto**: só leitura ou o que tem desfazer.
 - Chaves e tokens (Gemini, Google, Trello) **nunca** vão para o Git. `config/` continua no `.gitignore`. Nunca imprima chaves em logs.
 - Ações destrutivas precisam de confirmação e, quando possível, de desfazer (`core/undo.py`).
 - Não instale pacotes novos sem avisar o motivo.

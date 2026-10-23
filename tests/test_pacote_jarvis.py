@@ -31,6 +31,17 @@ def test_briefing_busca_noticias_do_brasil():
     assert '"top world news today")' not in main_py
 
 
+def test_transcricao_com_dica_pt_br():
+    cfg = config.transcricao_entrada()
+    assert cfg["language_codes"] == ["pt-BR"]
+    assert "Jarvis" in cfg["custom_vocabulary"]
+    from google.genai import types
+    types.AudioTranscriptionConfig(**cfg)          # formato aceito pelo SDK
+    main_py = (ROOT / "main.py").read_text(encoding="utf-8")
+    assert "input_audio_transcription=jarvis_config.transcricao_entrada()" in main_py
+    assert "jarvis_gate.ouvir(txt)" in main_py
+
+
 def test_nome_assistente(monkeypatch):
     monkeypatch.setattr(config, "_keys", lambda: {})
     assert config.nome_assistente() == "JARVIS"

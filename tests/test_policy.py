@@ -74,6 +74,39 @@ def test_describe_em_portugues_e_curto():
     assert len(detail) <= 160 and detail.endswith("…")
 
 
+# ── Três níveis: direto, voz, clique ───────────────────────────────────────
+
+@pytest.mark.parametrize("name, args", [
+    ("computer_control", {"action": "type", "text": "x"}),
+    ("computer_control", {"action": "click"}),
+    ("computer_control", {"action": "close_app", "app_name": "Notepad"}),
+    ("computer_settings", {"action": "type_text", "value": "x"}),
+    ("computer_settings", {"action": "save"}),
+    ("computer_settings", {"action": "press_key", "value": "enter"}),
+])
+def test_digitar_teclar_clicar_e_por_voz(name, args):
+    assert policy.nivel(name, args) == policy.VOZ
+
+
+@pytest.mark.parametrize("name, args", [
+    ("send_message", {"receiver": "Ana"}),
+    ("browser_control", {"action": "go_to"}),
+    ("file_controller", {"action": "delete"}),
+    ("code_helper", {"action": "run"}),
+    ("desktop_control", {"action": "clean"}),
+    ("computer_settings", {"action": "open_run"}),   # abre o Executar do Windows
+    ("computer_control", {}),                       # ação ausente: clique
+    ("computer_control", {"action": "inventada"}),
+])
+def test_o_resto_continua_no_clique(name, args):
+    assert policy.nivel(name, args) == policy.CLIQUE
+
+
+def test_direto():
+    assert policy.nivel("open_app", {"app_name": "x"}) == policy.DIRETO
+    assert policy.nivel("computer_settings", {"action": "volume_up"}) == policy.DIRETO
+
+
 # ── Tarefa 5: ações do JARVIS ───────────────────────────────────────────────
 
 @pytest.mark.parametrize("acao", ["criar", "listar_hoje", "concluir", "desfazer"])

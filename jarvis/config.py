@@ -46,6 +46,23 @@ def fuso() -> tzinfo:
         return timezone(timedelta(hours=-3), "BRT")
 
 
+# Palavras que o reconhecimento de voz costuma errar. Ajudam a transcrição.
+VOCABULARIO = [
+    "Jarvis", "Mestre Luc", "Internacional", "Inter", "Colorado", "GZH",
+    "Bloco de Notas", "WhatsApp", "Trello", "anota aí", "desfaz",
+]
+
+
+def transcricao_entrada() -> dict:
+    """Configuração da transcrição da voz do usuário no Gemini Live.
+
+    Sem isto o Live adivinha o idioma a cada frase, e no teste por voz
+    transcreveu português como inglês ("The price is for you"). Aceito pelo
+    servidor em 23/10/2026 (teste de conexão com gemini-3.1-flash-live-preview).
+    """
+    return {"language_codes": [IDIOMA], "custom_vocabulary": list(VOCABULARIO)}
+
+
 def dashboard_enabled() -> bool:
     """Painel do celular. Desligado até alguém pôr "dashboard_enabled": true
     em config/api_keys.json (auditoria, achado 3)."""

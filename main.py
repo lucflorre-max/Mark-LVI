@@ -1180,7 +1180,8 @@ class JarvisLive:
         cfg = dict(
             response_modalities=["AUDIO"],
             output_audio_transcription={},
-            input_audio_transcription={},
+            # JARVIS: transcrição da voz com dica pt-BR (ouvia português como inglês)
+            input_audio_transcription=jarvis_config.transcricao_entrada(),
             system_instruction="\n".join(parts),
             # strip_meta drops this project's own `tier` / `brief` keys, which
             # exist for the local-engine tool budget and are not part of the
@@ -1696,6 +1697,7 @@ class JarvisLive:
 
                         if sc.input_transcription and sc.input_transcription.text:
                             txt = _clean_transcript(sc.input_transcription.text)
+                            jarvis_gate.ouvir(txt)  # JARVIS: "sim" por voz vem do microfone
                             if txt:
                                 in_buf.append(txt)
                                 self._last_user_speech = time.monotonic()
