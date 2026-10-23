@@ -17,6 +17,7 @@ Objetivo: entender o que o Mark já faz, o que conflita com as regras do JARVIS 
 | 7 | Cota grátis do Gemini esgota nas tarefas de texto | Baixa | M1 |
 | 8 | `pynvml` obsoleto | Baixa | Quando atualizar o upstream |
 | 9 | `hud_style` padrão é `face`; o JARVIS quer `core` | Baixa | M1B |
+| 10 | "Fechar o Explorer" abre a caixa "Desligar o Windows" (OK como padrão) | **Alta** | M1 tarefa 0 |
 
 ## Mapa do código
 
@@ -116,6 +117,18 @@ As tarefas de texto em segundo plano percorrem uma lista de modelos (`core/gemin
 ### 9. Interface — Baixa
 
 `HUD_STYLES = ("face", "core")` (`memory/config_manager.py:133`), com padrão `face` (cabeça holográfica). O JARVIS quer `core`, sem rosto. Dá para trocar por configuração (`hud_style: "core"`), sem mexer no código. O prompt também diz ao modelo que "o rosto é seu corpo", o que deve sair no bloco de persona da M1.
+
+### 10. "Fechar o Explorer" quase desliga o PC — Alta
+
+*Encontrado no teste do checkpoint 0.1, em 23/10/2026.*
+
+O usuário pediu para fechar o Explorador de Arquivos, e o Jarvis chamou `computer_control(action="close_app", app_name="Explorer")`. O `_close_app` (`actions/computer_control.py:332`) procura o processo `explorer.exe` e `core/appidentity.py:645` manda `WM_CLOSE` para **todas as janelas visíveis desse processo**. Só que o `explorer.exe` também é o shell do Windows: área de trabalho ("Program Manager"/`Progman`) e barra de tarefas. Um `WM_CLOSE` na área de trabalho faz o Windows abrir a caixa **"Desligar o Windows"**, com **OK como botão padrão**. Um Enter, do usuário ou de uma ação `press enter` do próprio Jarvis, desliga o PC sem passar por `core/confirm.py`. Confiança: **Confirmado** (reproduzido; o resultado da ferramenta foi `status=failed`, mas o diálogo apareceu).
+
+**Correção (M1, tarefa 0):**
+- Em `core/appidentity.py`, nunca mandar `WM_CLOSE` para janelas de shell (`Progman`, `WorkerW`, `Shell_TrayWnd`, `Shell_SecondaryTrayWnd`). Para o Explorer, fechar só as janelas de pasta (classe `CabinetWClass`).
+- Tratar `explorer.exe` como protegido: "fechar o Explorer" fecha as janelas de pasta, nunca o processo.
+- `close_app` entra na lista de ações com CONFIRM da `jarvis/brain/policy.py`, já que fechar um app pode perder trabalho não salvo.
+- Sugerir a correção ao upstream (issue no FatihMakes/Mark-LVI).
 
 ## O que o Mark já faz bem (reaproveitar)
 
