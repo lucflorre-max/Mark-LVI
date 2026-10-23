@@ -414,15 +414,6 @@ class HudCanvas(QWidget):
         self.state    = "INITIALISING"
         self._assistant_name = assistant_name
 
-        # The holographic head that fills the HUD. If it could not be imported
-        # we fall back to the old glowing core so the panel is never empty.
-        self._avatar = None
-        if HoloAvatar is not None:
-            try:
-                self._avatar = HoloAvatar()
-            except Exception:
-                self._avatar = None
-
         # Which centrepiece to draw. Read once here and changed live by the
         # settings toggle; the avatar object is kept either way so switching
         # back is instant and costs no reload.
@@ -430,7 +421,17 @@ class HudCanvas(QWidget):
             from memory.config_manager import get_hud_style
             self.hud_style = get_hud_style()
         except Exception:
-            self.hud_style = "face"
+            self.hud_style = "core"  # JARVIS: padrão sem rosto
+
+        # The holographic head that fills the HUD. If it could not be imported
+        # we fall back to the old glowing core so the panel is never empty.
+        # JARVIS: a cabeça só é carregada no estilo "face" (economiza memória)
+        self._avatar = None
+        if HoloAvatar is not None and self.hud_style == "face":
+            try:
+                self._avatar = HoloAvatar()
+            except Exception:
+                self._avatar = None
         self._core_phase = 0.0
 
         self._tick       = 0
@@ -839,6 +840,24 @@ class HudCanvas(QWidget):
             p.drawText(QRectF(cx - r, cy - fsz, r * 2, fsz * 2),
                        Qt.AlignmentFlag.AlignCenter, name)
 
+    # JARVIS: tela de repouso (Meta 1B, tarefa 1). Ouvindo, sem falar e sem
+    # mudo: embaixo do núcleo só a hora e a frase, no lugar do status em inglês
+    # e da barra de áudio (o núcleo já tem o anel de áudio).
+    REPOUSO_FRASE = "Como posso ajudar, senhor?"
+
+    def _em_repouso(self) -> bool:
+        return self.state == "LISTENING" and not self.speaking and not self.muted
+
+    def _paint_repouso(self, p: QPainter, W: float, sy: float) -> None:
+        p.setPen(QPen(qcol(C.PRI), 1))
+        p.setFont(QFont("Courier New", 20, QFont.Weight.Bold))
+        p.drawText(QRectF(0, sy - 6, W, 32), Qt.AlignmentFlag.AlignCenter,
+                   time.strftime("%H:%M"))
+        p.setPen(QPen(qcol(C.WHITE), 1))
+        p.setFont(QFont("Courier New", 11))
+        p.drawText(QRectF(0, sy + 28, W, 22), Qt.AlignmentFlag.AlignCenter,
+                   self.REPOUSO_FRASE)
+
     def paintEvent(self, _):
         p = QPainter(self)
         if not p.isActive():      # device not ready (e.g. 0-size during layout) — skip cleanly
@@ -892,6 +911,12 @@ class HudCanvas(QWidget):
             _band_h = max(60.0, _sy_status - 12.0 - _band_t)
             _r = min(W * 0.46, _band_h / 2.0)
             self._paint_core(p, cx, _band_t + _band_h / 2.0, _r, W, _band_h)
+
+        # JARVIS: tela de repouso — só o núcleo, a hora e a frase
+        if self.hud_style != "face" and self._em_repouso():
+            self._paint_repouso(p, W, _sy_status)
+            p.end()
+            return
 
         # status text
         sy = _sy_status
@@ -5621,6 +5646,7 @@ class MainWindow(QMainWindow):
         self._hud_btn = _row(QPushButton())
         self._hud_btn.clicked.connect(self._toggle_hud_style)
         self._refresh_hud_btn()
+        self._hud_btn.hide()  # JARVIS: sem opção de rosto; o núcleo é a interface
 
         w.adjustSize()
         return w
