@@ -18,6 +18,8 @@ config/whatsapp_web/
 **/token*.json
 # Google OAuth client secrets
 **/client_secret*.json
+# JARVIS: credenciais e tokens do Google (Calendar) do JARVIS
+config/google/
 *credentials*.json
 .env
 .env.*
