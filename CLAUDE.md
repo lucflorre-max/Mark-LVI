@@ -1,6 +1,6 @@
 # JARVIS — instruções para o Claude Code
 
-Projeto pessoal: um assistente estilo J.A.R.V.I.S em português do Brasil, construído sobre o fork do **FatihMakes/Mark-LV (Mark LVI, 56)**. Licença do projeto base: CC BY-NC 4.0, uso pessoal e não comercial.
+Projeto pessoal: um assistente estilo J.A.R.V.I.S em português do Brasil, construído sobre o fork do **FatihMakes/Mark-LVI (Mark LVI, 56)**. Licença do projeto base: CC BY-NC 4.0, uso pessoal e não comercial.
 
 Objetivo central: **reduzir atrito, não criar mais trabalho.** A pergunta que o Jarvis responde é "o que eu preciso fazer agora?".
 
@@ -13,9 +13,9 @@ Objetivo central: **reduzir atrito, não criar mais trabalho.** A pergunta que o
 ## Onde fica o código
 
 - Código **nosso** vai em `jarvis/` (brain, tasks, calendar, projects, memory, integrations, interface) e em `plugins/`.
-- `main.py` (~2.650 linhas), `ui.py` (~7.200 linhas) e `core/` são do Mark. Só altere o necessário, com mudanças pequenas e comentadas com `# JARVIS:`; registre cada alteração em `docs/mudancas-no-mark.md`.
-- Não reescreva nem reorganize o núcleo do Mark sem passar pela auditoria da Meta 0.2.
-- Mantenha o remoto `upstream` (FatihMakes/Mark-LV) para receber melhorias; atualize uma vez por mês, em uma branch separada.
+- `main.py` (~2.400 linhas), `ui.py` (~6.350 linhas) e `core/` são do Mark. Só altere o necessário, com mudanças pequenas e comentadas com `# JARVIS:`; registre cada alteração em `docs/mudancas-no-mark.md`.
+- Não reescreva nem reorganize o núcleo do Mark sem passar pela auditoria da Meta 0.2 (`docs/auditoria-0.2.md`).
+- Mantenha o remoto `upstream` (FatihMakes/Mark-LVI) para receber melhorias; atualize uma vez por mês, em uma branch separada.
 
 ## Regras de segurança
 
@@ -69,4 +69,4 @@ Testes: `pytest` na raiz (a partir da Meta 1).
 
 ## Prompt para começar a Meta 0 (cole no Claude Code)
 
-> Leia este CLAUDE.md. Estamos na Meta 0 do plano. Confirme que o ambiente Python 3.12 está pronto, que o `upstream` aponta para FatihMakes/Mark-LV e que a branch `develop` existe. Depois rode `python main.py`, descreva qualquer erro e pare. Não altere nenhum arquivo do Mark nesta tarefa.
+> Leia este CLAUDE.md. Estamos na Meta 0 do plano. Confirme que o ambiente Python 3.12 está pronto, que o `upstream` aponta para FatihMakes/Mark-LVI e que a branch `develop` existe. Depois rode `python main.py`, descreva qualquer erro e pare. Não altere nenhum arquivo do Mark nesta tarefa.
