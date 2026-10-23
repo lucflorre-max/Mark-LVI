@@ -21,7 +21,12 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
 3. **Tarefa 6 — antes do checkpoint, trocar `hud_style` para `core`** por configuração (sem código), já que o prompt deixa de falar em rosto.
 4. **Datas:** valem as deste plano (29/10 a 04/11). O usuário prefere o prazo mais curto; o CLAUDE.md foi atualizado.
 
-**Andamento:** tarefa 0 concluída em 23/10/2026 (branch `feature/m1-seguranca`).
+**Andamento (23/10/2026):**
+- Tarefa 0 — código e testes prontos; falta o teste por voz do banner.
+- Extra — transcrição local em `data/conversas/`.
+- Tarefa 1 — concluída. Descoberta do plugin conferida com o carregador do Mark, sem abrir o app (pedido do usuário).
+- Tarefa 3 — concluída. Além das 5 funções, `obter`, `reabrir` (desfazer de concluir), caixa de entrada e projeto por nome, que a tarefa 4 vai usar. Fuso: `America/Sao_Paulo` se houver `tzdata`, senão UTC−3 fixo (sem dependência nova).
+- Próximas: tarefa 4 (captura por voz) e tarefa 5 (política), que dá para fazer sem voz e testar por voz no fim; tarefa 2 (persona) precisa de teste por voz.
 
 **Meta 0 fechada em 23/10/2026:** checkpoint 0.1 aprovado, falhas em `docs/checkpoint-0.1.md`.
 
