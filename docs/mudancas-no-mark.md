@@ -27,5 +27,6 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `ui.py:418-433` | `hud_style` lido antes; `HoloAvatar` só é criado no estilo `"face"` | Tirar o rosto da vista e não gastar memória com a malha 3D | M1B |
 | 23/10/2026 | `ui.py:5649` | Botão "HUD: ANIMATED FACE / REACTOR CORE" escondido | Sem opção de voltar ao rosto pela interface | M1B |
 | 23/10/2026 | `ui.py:843-860, 915-919` | Repouso (ouvindo, sem falar, sem mudo): só núcleo, hora e "Como posso ajudar, senhor?"; sem status em inglês e sem barra de áudio | Meta 1B, tarefa 1 | M1B tarefa 1 |
+| 23/10/2026 | `.gitignore` (Secrets) | `config/trello.json` ignorado | Chave e token do Trello do JARVIS | M2 tarefa 4 |
 
 As mudanças previstas que ainda faltam estão em `docs/auditoria-mark.md`. Sugerir ao upstream: achados 1 e 10.

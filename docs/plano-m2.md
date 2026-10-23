@@ -19,7 +19,7 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.1, 11, 
 | 1 | Acesso ao Google Calendar com o menor escopo, credenciais fora do Git | **feita** (23/10/2026): projeto Google configurado, autorizado, leitura da agenda principal confirmada |
 | 2 | Ler a agenda do dia e mostrar no card | **feita** (23/10/2026): ferramenta `jarvis_agenda` ação `ver` (hoje, amanhã ou AAAA-MM-DD); card no painel de conteúdo do Mark; títulos vão ao modelo como conteúdo não confiável |
 | 3 | Criar compromisso só depois da confirmação | **código e testes prontos** (23/10/2026): `jarvis_agenda` ação `criar`; mostra a mudança no card e no banner CONFIRM/CANCEL, grava só no clique; falta o teste por voz |
-| 4 | Trello com chave e token, quadro e listas | |
+| 4 | Trello com chave e token, quadro e listas | **código e testes prontos** (23/10/2026): `jarvis/integrations/trello.py` e comandos `chave`, `quadros`, `usar`, `status`; falta o usuário gerar a chave e o token (docs/integracoes-trello.md) |
 | 5 | Tarefa com horário → Trello + compromisso vinculado no Calendar; dizer onde salvou | |
 | 6 | Detectar conflitos e sugerir ajuste, sem aplicar sozinho | |
 
@@ -32,3 +32,4 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.1, 11, 
 - **Card da agenda (tarefa 2):** os cards da Meta 1B ainda não existem (falta o protótipo `docs/jarvis_visual_demo.html`). A tarefa 2 entrega os dados do card e usa o painel de conteúdo do Mark até lá (aprovado pelo usuário em 23/10/2026). O plugin chama `player.show_content`, então nenhum arquivo do Mark mudou.
 - **Criar compromisso usa o clique**, não o "sim" falado: agenda está na lista do clique no CLAUDE.md. O banner mostra o compromisso já formatado (`gate.guard(..., descricao=)`), avisa quando usou a duração padrão de 1h ou quando o horário já passou. O banner do Mark não devolve o resultado ao modelo depois do clique, então "criado" ou "não criado" aparece no card com o link do evento.
 - **Títulos da agenda são dados de terceiros** (convites): o texto para o modelo vai dentro de `core.outcome.untrusted("google_calendar", …)`; o card mostra o texto puro.
+- **Trello (tarefa 4):** chave e token em `config/trello.json` (fora do Git), enviados no cabeçalho `Authorization: OAuth oauth_consumer_key=…, oauth_token=…` e nunca na URL, para não aparecerem em logs nem em mensagens de erro (confiança: Provável, pela documentação oficial da API REST do Trello). Token com `scope=read,write` e `expiration=never`. O quadro escolhido precisa de duas listas, uma de tarefas novas e uma de concluídas; o comando `usar` acha pelo nome ou cria. Sem dependências novas (`requests` já vem do Mark).
