@@ -80,6 +80,8 @@ from core                     import gemini as _gemini
 from core.plugin_loader        import discover_plugins
 from core                      import undo as undo_stack
 from core                      import confirm as confirm_gate
+from jarvis.brain              import gate as jarvis_gate  # JARVIS: portão de confirmação
+from jarvis                    import config as jarvis_config  # JARVIS: flags do JARVIS
 from core                      import audio_devices
 from core.action_loader        import discover_actions
 from core.echo                 import EchoGuard
@@ -1400,7 +1402,10 @@ class JarvisLive:
                     args["file_path"] = self.ui.current_file
                 _ctx = {"player": self.ui, "speak": self.speak,
                         "response": None, "session_memory": None}
-                r = await loop.run_in_executor(None, lambda: self._action_registry.run(name, args, _ctx))
+                # JARVIS: ações perigosas esperam o CONFIRM na tela (jarvis/brain/policy.py)
+                r = jarvis_gate.guard(name, args, lambda: self._action_registry.run(name, args, _ctx))
+                if r is None:
+                    r = await loop.run_in_executor(None, lambda: self._action_registry.run(name, args, _ctx))
                 result = r or "Done."
                 # web_search: mirror results to the on-screen content panel
                 if (name == "web_search" and r
@@ -2363,6 +2368,9 @@ class JarvisLive:
 
         # Start dashboard (optional — needs: pip install fastapi "uvicorn[standard]" cryptography)
         try:
+            # JARVIS: painel desligado por padrão; ligar com "dashboard_enabled": true
+            if not jarvis_config.dashboard_enabled():
+                raise RuntimeError('off (set "dashboard_enabled": true in config/api_keys.json)')
             from dashboard.server import DashboardServer
             self._dashboard = DashboardServer()
             self._dashboard.set_connect_callback(self._on_phone_connected)

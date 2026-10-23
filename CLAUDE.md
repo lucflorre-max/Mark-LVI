@@ -50,14 +50,16 @@ python setup.py
 python main.py
 ```
 
-Testes: `pytest` na raiz (a partir da Meta 1).
+Testes: `pytest` na raiz (a partir da Meta 1). Instale com `python -m pip install -r requirements-dev.txt`.
 
 ## Metas e prazos (≈10 h por semana)
 
+Prazo preferido: quanto mais rápido, melhor. Vale a data mais cedo entre esta tabela e o plano da meta.
+
 | Meta | Período | Entrega |
 | --- | --- | --- |
-| M0 Base Mark LVI | 26/10 a 01/11/2026 | Mark funcionando, português testado, auditoria 0.2 |
-| M1 Núcleo Jarvis | 02/11 a 15/11 | Pacote `jarvis/`, persona, SQLite, tarefa por voz |
+| M0 Base Mark LVI | concluída em 23/10/2026 | Mark funcionando, português testado, auditoria 0.2 |
+| M1 Núcleo Jarvis | 29/10 a 04/11/2026 | Pacote `jarvis/`, persona, SQLite, tarefa por voz |
 | M1B Interface contextual | 16/11 a 29/11 | Núcleo limpo, estados e cards |
 | M2 Calendar + Trello | 30/11 a 13/12 | Agenda e tarefas sincronizadas, com confirmação |
 | M3 Prioridades | 14/12 a 20/12 | Agora / Depois / Se der tempo, sobrecarga |

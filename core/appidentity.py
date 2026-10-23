@@ -611,6 +611,13 @@ def wait_for_launch(spoken: str, before: set[int],
 # ─────────────────────────────────────────────────────────────────────────────
 #  Closing
 # ─────────────────────────────────────────────────────────────────────────────
+# JARVIS: janelas do shell do Windows (área de trabalho e barras de tarefas),
+# todas do explorer.exe. Nunca recebem WM_CLOSE (auditoria, achado 10).
+SHELL_WINDOW_CLASSES = frozenset({
+    "Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd",
+})
+
+
 def _post_close_windows(pid: int) -> int:
     """Ask each of a process's visible windows to close. Returns how many were
     asked.
@@ -642,6 +649,11 @@ def _post_close_windows(pid: int) -> int:
             owner = wintypes.DWORD()
             user32.GetWindowThreadProcessId(hwnd, ctypes.byref(owner))
             if int(owner.value) == pid:
+                # JARVIS: WM_CLOSE na área de trabalho abre "Desligar o Windows"
+                cls = ctypes.create_unicode_buffer(256)
+                user32.GetClassNameW(hwnd, cls, 256)
+                if cls.value in SHELL_WINDOW_CLASSES:
+                    return True
                 user32.PostMessageW(hwnd, WM_CLOSE, 0, 0)
                 asked += 1
             return True

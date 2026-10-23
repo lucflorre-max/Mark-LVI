@@ -19,7 +19,9 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
    - O tratamento "senhor" pode vir da configuração existente `"user_name": "senhor"` em `config/api_keys.json` (o Mark injeta `ADDRESS: Always call the user '...'`). "Mestre Luc" nos momentos descontraídos continua no prompt.
    - As linhas `#` do `prompt.txt` são enviadas ao modelo como texto (não são removidas). Isso é inofensivo, mas mantenha as marcas `# JARVIS:` curtas.
 3. **Tarefa 6 — antes do checkpoint, trocar `hud_style` para `core`** por configuração (sem código), já que o prompt deixa de falar em rosto.
-4. **Datas:** este plano usa 29/10 a 04/11; a tabela do CLAUDE.md diz 02/11 a 15/11. Vale o que o usuário confirmar.
+4. **Datas:** valem as deste plano (29/10 a 04/11). O usuário prefere o prazo mais curto; o CLAUDE.md foi atualizado.
+
+**Andamento:** tarefa 0 concluída em 23/10/2026 (branch `feature/m1-seguranca`).
 
 **Meta 0 fechada em 23/10/2026:** checkpoint 0.1 aprovado, falhas em `docs/checkpoint-0.1.md`.
 
