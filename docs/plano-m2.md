@@ -16,7 +16,7 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.1, 11, 
 
 | # | Tarefa | Situação |
 | --- | --- | --- |
-| 1 | Acesso ao Google Calendar com o menor escopo, credenciais fora do Git | código e testes prontos; falta o usuário criar a credencial (docs/integracoes-google.md) e autorizar |
+| 1 | Acesso ao Google Calendar com o menor escopo, credenciais fora do Git | **feita** (23/10/2026): projeto Google configurado, autorizado, leitura da agenda principal confirmada |
 | 2 | Ler a agenda do dia e mostrar no card | |
 | 3 | Criar compromisso só depois da confirmação | |
 | 4 | Trello com chave e token, quadro e listas | |
@@ -25,8 +25,8 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.1, 11, 
 
 ## Decisões
 
-- **Escopo do Calendar:** `https://www.googleapis.com/auth/calendar.events.owned` — ver, criar, alterar e excluir eventos só nas agendas que o usuário possui. Mais estreito que `calendar.events` (todas as agendas acessíveis). Confiança: Provável que cubra a agenda principal; confirmar no primeiro uso real.
+- **Escopo do Calendar:** `https://www.googleapis.com/auth/calendar.events.owned` — ver, criar, alterar e excluir eventos só nas agendas que o usuário possui. Mais estreito que `calendar.events` (todas as agendas acessíveis). Confirmado em 23/10/2026: lê a agenda principal.
 - **Credenciais:** `config/google/client_secret.json` (OAuth "App para computador") e `config/google/token_calendar.json`. Ambos fora do Git (`config/google/` no `.gitignore`).
-- **Tela de consentimento em "Teste" expira a autorização em 7 dias**; publicar como "Em produção" (uso pessoal, aviso de app não verificado) evita isso. Confiança: Provável.
+- **Tela de consentimento em "Teste" expira a autorização em 7 dias**; publicar como "Em produção" exigiria página inicial, política de privacidade e termos num domínio verificado, então o app fica em "Teste" e a cada 7 dias o usuário roda `python -m jarvis.integrations.google_auth autorizar` de novo. O Jarvis avisa quando o token expira (`NaoAutorizado`).
 - **Sem dependências novas:** `google-api-python-client`, `google-auth-oauthlib` e `requests` já vêm do Mark.
 - **Card da agenda (tarefa 2):** os cards da Meta 1B ainda não existem (falta o protótipo `docs/jarvis_visual_demo.html`). A tarefa 2 entrega os dados do card e usa o painel de conteúdo do Mark até lá.
