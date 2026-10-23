@@ -24,6 +24,13 @@ def test_config_basica():
     assert agora.utcoffset().total_seconds() == -3 * 3600
 
 
+def test_briefing_busca_noticias_do_brasil():
+    assert "Brasil" in config.BRIEFING_NOTICIAS
+    main_py = (ROOT / "main.py").read_text(encoding="utf-8")
+    assert "jarvis_config.BRIEFING_NOTICIAS" in main_py
+    assert '"top world news today")' not in main_py
+
+
 def test_nome_assistente(monkeypatch):
     monkeypatch.setattr(config, "_keys", lambda: {})
     assert config.nome_assistente() == "JARVIS"

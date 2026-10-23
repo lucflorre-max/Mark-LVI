@@ -1930,7 +1930,8 @@ class JarvisLive:
 
         # Start fetching news immediately — runs in parallel while phase 1 plays
         loop = asyncio.get_event_loop()
-        news_future = loop.run_in_executor(None, _fetch_news_sync, "top world news today")
+        # JARVIS: notícias do Brasil no briefing (em inglês vinham as dos EUA)
+        news_future = loop.run_in_executor(None, _fetch_news_sync, jarvis_config.BRIEFING_NOTICIAS)
 
         await asyncio.sleep(0.3)
         if not self.session:
