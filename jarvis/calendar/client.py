@@ -8,6 +8,8 @@ documento-mestre: alteração de agenda mostra a mudança e pede confirmação).
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from jarvis.integrations import google_auth
 
 AGENDA = "primary"
@@ -24,6 +26,21 @@ class CalendarClient:
             self._service = build("calendar", "v3", credentials=creds,
                                   cache_discovery=False)
         return self._service
+
+    def eventos(self, inicio: datetime, fim: datetime) -> list[dict]:
+        """Eventos da agenda principal que tocam [inicio, fim), já expandidos
+        (recorrentes viram ocorrências) e em ordem de início."""
+        itens, pagina = [], None
+        while True:
+            r = self._api().events().list(
+                calendarId=AGENDA, timeMin=inicio.isoformat(),
+                timeMax=fim.isoformat(), singleEvents=True,
+                orderBy="startTime", maxResults=250, pageToken=pagina,
+            ).execute()
+            itens.extend(r.get("items", []))
+            pagina = r.get("nextPageToken")
+            if not pagina:
+                return itens
 
     def verificar(self) -> str:
         """Confirma que o escopo dá acesso à agenda principal (1 evento lido)."""

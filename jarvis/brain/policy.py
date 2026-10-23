@@ -61,6 +61,9 @@ _SAFE: dict[str, frozenset[str]] = {
     "jarvis_tarefas": frozenset({"criar", "listar_hoje", "concluir", "desfazer"}),
     # Perfil de comunicação: ler, esquecer e rejeitar não criam preferência.
     "jarvis_perfil": frozenset({"sugestoes", "listar", "esquecer", "rejeitar"}),
+    # Agenda: consulta roda direto (documento-mestre §11). Criar e alterar
+    # compromisso entram na tarefa 3 da Meta 2, com confirmação.
+    "jarvis_agenda": frozenset({"ver"}),
 }
 
 # Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
@@ -88,6 +91,7 @@ _DEFAULT_ACTION = {
     "code_helper": "auto",       # padrão do code_helper, que pode executar código
     "jarvis_tarefas": "criar",
     "jarvis_perfil": "sugestoes",
+    "jarvis_agenda": "ver",
 }
 
 # As categorias do CLAUDE.md e onde cada uma está coberta. Documentação viva:
@@ -126,6 +130,7 @@ LABELS: dict[str, str] = {
     "game_updater":      "Atualizar ou instalar jogos",
     "jarvis_tarefas":    "Tarefas",
     "jarvis_perfil":     "Lembrar do seu jeito de falar",
+    "jarvis_agenda":     "Agenda",
 }
 
 _ACTION_KEYS = ("action", "mode", "acao")
