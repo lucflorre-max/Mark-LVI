@@ -61,8 +61,8 @@ _SAFE: dict[str, frozenset[str]] = {
     "jarvis_tarefas": frozenset({"criar", "listar_hoje", "concluir", "desfazer"}),
     # Perfil de comunicação: ler, esquecer e rejeitar não criam preferência.
     "jarvis_perfil": frozenset({"sugestoes", "listar", "esquecer", "rejeitar"}),
-    # Agenda: consulta roda direto (documento-mestre §11). Criar e alterar
-    # compromisso entram na tarefa 3 da Meta 2, com confirmação.
+    # Agenda: consulta roda direto (documento-mestre §11). Criar ou alterar
+    # compromisso fica fora daqui de propósito: pede o clique.
     "jarvis_agenda": frozenset({"ver"}),
 }
 
@@ -98,7 +98,8 @@ _DEFAULT_ACTION = {
 # tests/test_policy.py confere que todo exemplo daqui pede CONFIRM.
 CATEGORIAS_CONFIRM: dict[str, list[tuple[str, dict]]] = {
     "enviar mensagem": [("send_message", {})],
-    "alterar agenda": [("reminder", {})],   # Google Calendar entra na Meta 2
+    "alterar agenda": [("reminder", {}),
+                       ("jarvis_agenda", {"acao": "criar"})],
     "apagar em lote": [("file_controller", {"action": "organize_desktop"}),
                        ("desktop_control", {"action": "clean"})],
     "comandos no PC": [("computer_control", {"action": "type"}),

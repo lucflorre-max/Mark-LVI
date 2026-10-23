@@ -42,6 +42,11 @@ class CalendarClient:
             if not pagina:
                 return itens
 
+    def criar(self, corpo: dict) -> dict:
+        """Insere um evento na agenda principal. Só o serviço chama, e só
+        depois da confirmação do usuário."""
+        return self._api().events().insert(calendarId=AGENDA, body=corpo).execute()
+
     def verificar(self) -> str:
         """Confirma que o escopo dá acesso à agenda principal (1 evento lido)."""
         self._api().events().list(calendarId=AGENDA, maxResults=1,

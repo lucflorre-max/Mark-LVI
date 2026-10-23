@@ -23,6 +23,7 @@ class Evento:
     local: str = ""
     link: str = ""
     id: str = ""
+    data: date | None = None     # o dia, nos eventos de dia inteiro
 
 
 def limites_do_dia(dia: date, fuso: tzinfo) -> tuple[datetime, datetime]:
@@ -51,7 +52,7 @@ def de_api(item: dict, fuso: tzinfo) -> Evento | None:
         titulo=(item.get("summary") or "").strip() or SEM_TITULO,
         inicio=ini, fim=fim, dia_inteiro=ini is None,
         local=(item.get("location") or "").strip(),
-        link=item.get("htmlLink") or "", id=item.get("id") or "",
+        link=item.get("htmlLink") or "", id=item.get("id") or "", data=dia_ini,
     )
 
 
@@ -107,6 +108,16 @@ def card(eventos: list[Evento], dia: date, agora: datetime) -> tuple[str, str]:
         local = f" · {e.local}" if e.local else ""
         linhas.append(f"{marca}{_faixa(e, dia, fala=False):<13}{e.titulo}{local}")
     return titulo, "\n".join(linhas)
+
+
+def descrever(e: Evento, hoje: date) -> str:
+    """Uma linha com tudo que vai mudar: '“Dentista” · terça, 27/10, 14h30–15h30 · Centro'."""
+    if e.dia_inteiro:
+        quando = f"{nome_do_dia(e.data, hoje)}, dia inteiro"
+    else:
+        quando = f"{nome_do_dia(e.inicio.date(), hoje)}, {_faixa(e, e.inicio.date(), fala=True)}"
+    local = f" · {e.local}" if e.local else ""
+    return f"“{e.titulo}” · {quando}{local}"
 
 
 def para_fala(eventos: list[Evento], dia: date) -> str:

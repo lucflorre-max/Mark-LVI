@@ -83,7 +83,8 @@ def _mesma_chamada(a: dict, b: dict) -> bool:
     return limpo(a) == limpo(b)
 
 
-def _guarda_voz(name: str, args: dict) -> Optional[str]:
+def _guarda_voz(name: str, args: dict,
+                descricao: tuple[str, str] | None = None) -> Optional[str]:
     global _pedido
     agora = _relogio()
     with _lock:
@@ -97,7 +98,7 @@ def _guarda_voz(name: str, args: dict) -> Optional[str]:
                     "yes. Acknowledge in one short sentence and drop it.")
         _pedido = _PedidoVoz(nome=name, args=dict(args), em=agora)
 
-    title, detail = policy.describe(name, args)
+    title, detail = descricao or policy.describe(name, args)
     return (f"[VOICE_CONFIRM] Nothing was done yet. In one short sentence, in "
             f"the user's language, say exactly what you are about to do "
             f"({title}; {detail}) and ask if you may. If the user says yes, call "
@@ -106,16 +107,19 @@ def _guarda_voz(name: str, args: dict) -> Optional[str]:
 
 
 def guard(name: str, args: dict, run: Callable[[], str],
-          confirm=None) -> Optional[str]:
+          confirm=None, descricao: tuple[str, str] | None = None) -> Optional[str]:
     """None: pode rodar já. String: resposta para o modelo; nada foi executado.
 
     `confirm` é o módulo core.confirm; os testes passam um falso.
+    `descricao` (título, detalhe) troca o texto montado a partir dos argumentos
+    quando o serviço sabe dizer a mudança melhor (ex.: o compromisso já
+    formatado em vez de "inicio: 2026-10-27T14:30").
     """
     nivel = policy.nivel(name, args)
     if nivel == policy.DIRETO:
         return None
     if nivel == policy.VOZ:
-        return _guarda_voz(name, args)
+        return _guarda_voz(name, args, descricao)
 
     if confirm is None:
         from core import confirm as confirm  # noqa: PLC0415 — só no Mark
@@ -131,7 +135,7 @@ def guard(name: str, args: dict, run: Callable[[], str],
             f"cancel that one first, then ask again."
         )
 
-    title, detail = policy.describe(name, args)
+    title, detail = descricao or policy.describe(name, args)
     return confirm.request(f"jarvis:{name}", title, detail, run)
 
 
