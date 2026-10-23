@@ -17,6 +17,10 @@ DB_PATH = DATA_DIR / "jarvis.db"
 IDIOMA = "pt-BR"
 FUSO_NOME = "America/Sao_Paulo"
 
+# Busca de notícias do briefing inicial. Em inglês, o buscador devolvia as
+# manchetes dos EUA; esta foi a que trouxe g1/Reuters Brasil no teste por voz.
+BRIEFING_NOTICIAS = "manchetes notícias Brasil hoje"
+
 
 def _keys() -> dict:
     try:

@@ -35,6 +35,7 @@ def test_perigosas_pedem_confirmacao(name, args):
     ("computer_control", {"action": "screenshot"}),
     ("computer_control", {"action": "scroll"}),
     ("computer_settings", {"action": "volume_down"}),
+    ("computer_settings", {"action": "new_tab"}),      # teste por voz: só atrapalhava
     ("browser_control", {"action": "get_text"}),
     ("desktop_control", {"action": "list"}),
     ("file_controller", {"action": "read", "path": "desktop"}),

@@ -15,6 +15,7 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `core/prompt.txt` ([PERSONA], nova) | pt-BR, "senhor"/"Mestre Luc", tom, Confirmado/Provável/Incerto, sugerir antes de alterar, não pesquisar na web sobre si mesmo | Persona do CLAUDE.md; no checkpoint 0.1 ele pesquisou na web "is JARVIS connected to my Google account" | M1 tarefa 2 |
 | 23/10/2026 | `core/prompt.txt` ([JUDGEMENT], [SPEED]) | Pedido ambíguo que muda algo → uma pergunta antes | "act rather than asking" conflitava com "sugere antes de alterar" (achado 4) | M1 tarefa 2 |
 | 23/10/2026 | `core/prompt.txt` ([EXECUTION]) | Ferramentas `jarvis_*` recebem texto em pt-BR; preferência permanente só depois de um "sim"; portão cobre mais ações e `[CONFIRMATION_BUSY]` | Títulos de tarefa sairiam em inglês; memória silenciosa (achado 5) | M1 tarefa 2 |
+| 23/10/2026 | `main.py:1934-1935` | Briefing busca `jarvis_config.BRIEFING_NOTICIAS` ("manchetes notícias Brasil hoje") | Com "top world news today" vinham manchetes dos EUA (teste por voz, checkpoint 1.0) | M1 tarefa 2 |
 | 23/10/2026 | `config/api_keys.json` (local) | `"hud_style": "core"` | Núcleo circular em vez do rosto (configuração, sem código) | M1 tarefa 2 |
 | 23/10/2026 | `main.py:85, 1289, 1443, 1720, 1740` | Transcrição local: fala do usuário, resposta, ferramenta e resultado vão para `jarvis/memory/transcript.py` | Analisar conversas reais para melhorar o JARVIS; desligar com `"transcript_enabled": false` | M1 (extra) |
 

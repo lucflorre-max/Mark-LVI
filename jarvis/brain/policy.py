@@ -33,6 +33,8 @@ _SAFE: dict[str, frozenset[str]] = {
         "brightness_up", "brightness_down", "sleep_display", "pause_video",
         "full_screen", "minimize", "maximize", "snap_left", "snap_right",
         "switch_window", "show_desktop", "focus_search", "next_tab", "prev_tab",
+        "new_tab",   # Ctrl+T não estraga nada; pedir clique só atrapalhava
+
         "zoom_in", "zoom_out", "zoom_reset", "find_on_page",
         "scroll_up", "scroll_down", "scroll_top", "scroll_bottom",
         "page_up", "page_down", "copy", "screenshot", "lock_screen",
