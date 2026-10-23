@@ -7,14 +7,14 @@ Objetivo central: **reduzir atrito, não criar mais trabalho.** A pergunta que o
 ## Como trabalhar
 
 - Faça **uma tarefa do plano por sessão**, em uma branch `feature/<meta>-<tarefa>` criada a partir de `develop`. Ao terminar, rode os testes, faça o commit e diga o que mudou.
-- Antes de começar uma meta, leia o plano (JARVIS — Plano de Implementação) e confirme qual tarefa está sendo feita. Marque como concluída só depois de testada.
+- Antes de começar uma meta, leia o plano da meta em `docs/plano-m<N>.md` (ex.: `docs/plano-m1.md`) e confirme qual tarefa está sendo feita. Marque como concluída só depois de testada.
 - Em dúvida técnica incerta, pesquise primeiro (documentação oficial, GitHub e issues) e diga o nível de confiança: Confirmado, Provável ou Incerto.
 
 ## Onde fica o código
 
 - Código **nosso** vai em `jarvis/` (brain, tasks, calendar, projects, memory, integrations, interface) e em `plugins/`.
 - `main.py` (~2.400 linhas), `ui.py` (~6.350 linhas) e `core/` são do Mark. Só altere o necessário, com mudanças pequenas e comentadas com `# JARVIS:`; registre cada alteração em `docs/mudancas-no-mark.md`.
-- Não reescreva nem reorganize o núcleo do Mark sem passar pela auditoria da Meta 0.2 (`docs/auditoria-0.2.md`).
+- Não reescreva nem reorganize o núcleo do Mark sem passar pela auditoria da Meta 0.2 (`docs/auditoria-mark.md`).
 - Mantenha o remoto `upstream` (FatihMakes/Mark-LVI) para receber melhorias; atualize uma vez por mês, em uma branch separada.
 
 ## Regras de segurança

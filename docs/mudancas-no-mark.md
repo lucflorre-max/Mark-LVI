@@ -7,4 +7,4 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | Data | Arquivo:linha | O quê | Por quê | Meta |
 | --- | --- | --- | --- | --- |
 
-Nenhuma mudança até agora. As previstas estão em `docs/auditoria-0.2.md`.
+Nenhuma mudança até agora. As previstas estão em `docs/auditoria-mark.md`.
