@@ -15,7 +15,9 @@ PLUGIN = {
         "'anota aí', 'me lembra de', 'tenho que', 'o que tenho hoje', "
         "'terminei', 'desfaz'. Para avisos com hora marcada no Windows use "
         "`reminder`, não esta ferramenta. Extraia os campos da fala; deixe "
-        "vazio o que ele não disse, nunca invente prazo, prioridade ou duração."
+        "vazio o que ele não disse, nunca invente prazo, prioridade ou duração. "
+        "A ferramenta pergunta o que falta e devolve um resumo; só mande "
+        "confirmado=true depois que o usuário disser sim a esse resumo."
     ),
     "parameters": {
         "type": "OBJECT",
@@ -27,7 +29,11 @@ PLUGIN = {
             "titulo": {"type": "STRING", "description": "O que precisa ser feito, curto"},
             "prazo": {
                 "type": "STRING",
-                "description": "Data e hora no formato ISO 8601 (AAAA-MM-DDTHH:MM), se dita",
+                "description": (
+                    "Data e hora em ISO 8601 (AAAA-MM-DDTHH:MM) ou só a data "
+                    "(AAAA-MM-DD), se dita. 'indefinido' quando o usuário "
+                    "disser que vê depois ou que não sabe."
+                ),
             },
             "prioridade": {"type": "STRING", "description": "alta | media | baixa, se dita"},
             "duracao_min": {"type": "INTEGER", "description": "Duração estimada em minutos, se dita"},
@@ -37,7 +43,10 @@ PLUGIN = {
                 "type": "BOOLEAN",
                 "description": "true só depois que o usuário disse 'sim' ao resumo",
             },
-            "tarefa_id": {"type": "INTEGER", "description": "Id da tarefa, para concluir"},
+            "tarefa_id": {
+                "type": "INTEGER",
+                "description": "Id da tarefa para concluir (vem em listar_hoje); ou use o título",
+            },
         },
         "required": [],
     },

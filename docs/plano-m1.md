@@ -26,7 +26,11 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
 - Extra — transcrição local em `data/conversas/`.
 - Tarefa 1 — concluída. Descoberta do plugin conferida com o carregador do Mark, sem abrir o app (pedido do usuário).
 - Tarefa 3 — concluída. Além das 5 funções, `obter`, `reabrir` (desfazer de concluir), caixa de entrada e projeto por nome, que a tarefa 4 vai usar. Fuso: `America/Sao_Paulo` se houver `tzdata`, senão UTC−3 fixo (sem dependência nova).
-- Próximas: tarefa 4 (captura por voz) e tarefa 5 (política), que dá para fazer sem voz e testar por voz no fim; tarefa 2 (persona) precisa de teste por voz.
+- Tarefa 4 — código e testes prontos (fluxo completo simulado em `tests/test_service.py`, incluindo a frase do plano); falta o teste por voz.
+  - `confirmado=true` só vale depois de o resumo ser mostrado, e qualquer mudança de campo exige novo resumo.
+  - "Desfazer" usa a pilha de `core/undo.py`, então o `undo` do Mark também desfaz tarefas.
+- Tarefa 5 — concluída. `jarvis_tarefas` está na política; ação nova pede CONFIRM até ser classificada; `CATEGORIAS_CONFIRM` testa as categorias do CLAUDE.md.
+- **Testes por voz pendentes** (quando o usuário puder falar): banner da tarefa 0, tarefa 2 (persona) e roteiro da tarefa 4. Depois, tarefa 6 (checkpoint 1.0).
 
 **Meta 0 fechada em 23/10/2026:** checkpoint 0.1 aprovado, falhas em `docs/checkpoint-0.1.md`.
 
