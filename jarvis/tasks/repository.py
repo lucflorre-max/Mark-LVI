@@ -238,6 +238,10 @@ class TaskRepository:
                         (texto, origem, agora()))
         return self.listar_inbox(incluir_processados=True, ids=[cur.lastrowid])[0]
 
+    def apagar_inbox(self, item_id: int) -> bool:
+        """Desfaz `adicionar_inbox`. False quando o item já não existia."""
+        return self._run("DELETE FROM inbox WHERE id = ?", (item_id,)).rowcount > 0
+
     def listar_inbox(self, incluir_processados: bool = False,
                      ids: list[int] | None = None) -> list[ItemInbox]:
         sql, params = "SELECT * FROM inbox WHERE 1 = 1", []

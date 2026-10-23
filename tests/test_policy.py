@@ -1,6 +1,7 @@
 import pytest
 
-from jarvis.brain.policy import describe, requires_confirm
+from jarvis.brain import policy
+from jarvis.brain.policy import CATEGORIAS_CONFIRM, describe, requires_confirm
 
 
 @pytest.mark.parametrize("name, args", [
@@ -70,6 +71,52 @@ def test_describe_em_portugues_e_curto():
     assert title == "Enviar mensagem"
     assert "receiver: Ana" in detail
     assert len(detail) <= 160 and detail.endswith("…")
+
+
+# ── Tarefa 5: ações do JARVIS ───────────────────────────────────────────────
+
+@pytest.mark.parametrize("acao", ["criar", "listar_hoje", "concluir", "desfazer"])
+def test_tarefas_reversiveis_nao_pedem_clique(acao):
+    assert requires_confirm("jarvis_tarefas", {"acao": acao}) is False
+
+
+def test_tarefas_sem_acao_e_criar():
+    assert requires_confirm("jarvis_tarefas", {"titulo": "x"}) is False
+
+
+def test_acao_nova_do_jarvis_pede_clique_ate_ser_classificada():
+    assert requires_confirm("jarvis_tarefas", {"acao": "apagar_todas"}) is True
+
+
+@pytest.mark.parametrize("categoria", sorted(CATEGORIAS_CONFIRM))
+def test_categorias_do_claude_md_pedem_confirmacao(categoria):
+    for nome, args in CATEGORIAS_CONFIRM[categoria]:
+        assert requires_confirm(nome, args), f"{categoria}: {nome} {args}"
+
+
+def test_service_respeita_a_politica(monkeypatch, tmp_path):
+    """Se a política mudar 'concluir' para irreversível, o plugin passa a
+    esperar o CONFIRM sem nenhuma mudança no serviço."""
+    from jarvis.tasks import service
+    from jarvis.tasks.repository import TaskRepository
+    from tests.test_gate import FakeConfirm
+
+    repo = TaskRepository(tmp_path / "t.db")
+    t = repo.adicionar("Roteador", prazo="2026-10-23")
+    fake = FakeConfirm()
+    monkeypatch.setattr(service, "_repo", repo)
+    monkeypatch.setattr(service, "_confirm", fake)
+    monkeypatch.setitem(policy._SAFE, "jarvis_tarefas",
+                        frozenset({"criar", "listar_hoje", "desfazer"}))
+
+    out = service.handle({"acao": "concluir", "tarefa_id": t.id})
+    assert out.startswith("[CONFIRMATION_PENDING]")
+    assert repo.obter(t.id).status == "aberta"        # nada antes do clique
+    key, title, _detail, run = fake.requests[0]
+    assert key == "jarvis:jarvis_tarefas" and title == "Tarefas: concluir"
+    monkeypatch.setattr(service, "_undo", type("U", (), {"push_undo": lambda *a: None})())
+    run()                                             # o clique em CONFIRM
+    assert repo.obter(t.id).status == "concluida"
 
 
 def test_describe_inclui_subacao_e_ignora_vazios():

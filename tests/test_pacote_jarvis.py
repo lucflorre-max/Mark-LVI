@@ -50,7 +50,5 @@ def test_plugin_so_repassa_para_o_servico(monkeypatch):
     assert chamadas == [{"acao": "listar_hoje"}]
 
 
-def test_servico_nunca_finge_que_salvou():
-    out = service.handle({"acao": "criar", "titulo": "x"})
-    assert "Nada foi salvo" in out
+def test_acao_desconhecida():
     assert "desconhecida" in service.handle({"acao": "voar"})

@@ -52,6 +52,31 @@ _SAFE: dict[str, frozenset[str]] = {
     }),
     "code_helper": frozenset({"explain"}),
     "game_updater": frozenset({"list", "download_status", "schedule_status"}),
+    # Ações do JARVIS. Criar e concluir são reversíveis (core/undo.py), e
+    # criar ainda pede o "sim" por voz antes de salvar (jarvis/tasks/service.py).
+    # Uma ação nova que não estiver aqui pede CONFIRM até ser classificada.
+    "jarvis_tarefas": frozenset({"criar", "listar_hoje", "concluir", "desfazer"}),
+}
+
+# Sub-ação usada quando o modelo não manda nenhuma.
+_DEFAULT_ACTION = {
+    "code_helper": "auto",       # padrão do code_helper, que pode executar código
+    "jarvis_tarefas": "criar",
+}
+
+# As categorias do CLAUDE.md e onde cada uma está coberta. Documentação viva:
+# tests/test_policy.py confere que todo exemplo daqui pede CONFIRM.
+CATEGORIAS_CONFIRM: dict[str, list[tuple[str, dict]]] = {
+    "enviar mensagem": [("send_message", {})],
+    "alterar agenda": [("reminder", {})],   # Google Calendar entra na Meta 2
+    "apagar em lote": [("file_controller", {"action": "organize_desktop"}),
+                       ("desktop_control", {"action": "clean"})],
+    "comandos no PC": [("computer_control", {"action": "type"}),
+                       ("computer_control", {"action": "close_app"}),
+                       ("computer_settings", {"action": "press_key"}),
+                       ("code_helper", {"action": "run"}),
+                       ("dev_agent", {})],
+    "navegador": [("browser_control", {"action": "go_to"})],
 }
 
 # Ferramentas que pedem confirmação sempre, seja qual for a sub-ação.
@@ -73,12 +98,15 @@ LABELS: dict[str, str] = {
     "dev_agent":         "Criar e executar projeto",
     "reminder":          "Agendar lembrete",
     "game_updater":      "Atualizar ou instalar jogos",
+    "jarvis_tarefas":    "Tarefas",
 }
+
+_ACTION_KEYS = ("action", "mode", "acao")
 
 
 def sub_action(args: dict) -> str:
     """A sub-ação pedida, normalizada. '' quando não veio."""
-    raw = args.get("action") or args.get("mode") or ""
+    raw = next((args[k] for k in _ACTION_KEYS if args.get(k)), "")
     return str(raw).strip().lower()
 
 
@@ -89,9 +117,7 @@ def requires_confirm(name: str, args: dict | None) -> bool:
     safe = _SAFE.get(name)
     if safe is None:
         return False
-    action = sub_action(args or {})
-    if name == "code_helper" and not action:
-        action = "auto"   # padrão do code_helper, que pode executar código
+    action = sub_action(args or {}) or _DEFAULT_ACTION.get(name, "")
     return action not in safe
 
 
@@ -104,7 +130,7 @@ def describe(name: str, args: dict | None, limit: int = 160) -> tuple[str, str]:
         title = f"{title}: {action}"
     parts = []
     for key, value in args.items():
-        if key in ("action", "mode") or value in (None, "", [], {}):
+        if key in _ACTION_KEYS or value in (None, "", [], {}):
             continue
         text = str(value).replace("\n", " ")
         parts.append(f"{key}: {text}")
