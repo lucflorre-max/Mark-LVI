@@ -1,0 +1,2 @@
+# JARVIS — dependências só de desenvolvimento (testes). O app não precisa delas.
+pytest>=8,<10
