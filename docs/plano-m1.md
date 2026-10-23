@@ -14,13 +14,14 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
    - `.gitignore`: comentários em linha própria (hoje os segredos não são ignorados; mitigado só localmente em `.git/info/exclude`). Já incluir `data/` (tarefa 3).
    - Portão de confirmação central em `main.py:1403` para as ações do Mark que mandam mensagem, mexem no PC ou executam código (`send_message`, `computer_control`, `browser_control`, `desktop_control`, `dev_agent`, `code_helper`, `reminder`, `game_updater`). A lista fica em `jarvis/brain/policy.py`, que nasce aqui e é ampliada na tarefa 5.
    - Painel do celular desligado por padrão (flag em `config/api_keys.json`).
+   - **Achado 10 (checkpoint 0.1):** `close_app` não pode mandar `WM_CLOSE` para a área de trabalho e a barra de tarefas (`explorer.exe`); hoje isso abre "Desligar o Windows". `close_app` também entra na lista com CONFIRM.
 2. **Tarefa 2 (persona) — completar.** Além do idioma, tratamento e rosto, o `core/prompt.txt` manda "act rather than asking" (`[JUDGEMENT]`, `[SPEED]`) e "save_memory… silently". Isso conflita com "sugere antes de alterar" e "preferência permanente só com confirmação". Ajustar esses trechos também, com `# JARVIS:`.
    - O tratamento "senhor" pode vir da configuração existente `"user_name": "senhor"` em `config/api_keys.json` (o Mark injeta `ADDRESS: Always call the user '...'`). "Mestre Luc" nos momentos descontraídos continua no prompt.
    - As linhas `#` do `prompt.txt` são enviadas ao modelo como texto (não são removidas). Isso é inofensivo, mas mantenha as marcas `# JARVIS:` curtas.
 3. **Tarefa 6 — antes do checkpoint, trocar `hud_style` para `core`** por configuração (sem código), já que o prompt deixa de falar em rosto.
 4. **Datas:** este plano usa 29/10 a 04/11; a tabela do CLAUDE.md diz 02/11 a 15/11. Vale o que o usuário confirmar.
 
-**Pendente da Meta 0 (checkpoint 0.1):** testar por voz "abra o Bloco de Notas" e anotar as falhas de português em `docs/checkpoint-0.1.md`.
+**Meta 0 fechada em 23/10/2026:** checkpoint 0.1 aprovado, falhas em `docs/checkpoint-0.1.md`.
 
 ---
 
@@ -29,8 +30,8 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
 ## Antes de começar (Meta 0 precisa estar fechada)
 
 - [x] Fork clonado, `upstream` e branch `develop` criados, `CLAUDE.md` na raiz.
-- [ ] Checkpoint 0.1: `python main.py` abre, ouve, responde e abre um aplicativo. *(abre, ouve e responde: ok em 23/10; abrir aplicativo: falta testar)*
-- [ ] Português testado (conversa e voz) e falhas anotadas. *(conversa por voz em pt-BR ok; falhas ainda não anotadas)*
+- [x] Checkpoint 0.1: `python main.py` abre, ouve, responde e abre um aplicativo.
+- [x] Português testado (conversa e voz) e falhas anotadas em `docs/checkpoint-0.1.md`.
 - [x] Auditoria 0.2 salva em `docs/auditoria-mark.md`. As tarefas abaixo devem respeitá-la; se ela mandar substituir algo daqui, a auditoria vence.
 
 ## O que o código do Mark já nos dá
@@ -55,7 +56,7 @@ Uma tarefa por sessão, em uma branch `feature/m1-<tarefa>`.
 
 ### 0. Segurança da auditoria (antes da tarefa 1) — *adicionada pela auditoria*
 
-> Leia o CLAUDE.md e docs/auditoria-mark.md (achados 1, 2 e 3). Corrija o `.gitignore` do Mark movendo os comentários para linhas próprias e acrescente `data/`. Crie `jarvis/brain/policy.py` com a lista de ações do Mark que exigem CONFIRM por clique e, em `main.py:1403`, encaminhe essas ações para `core.confirm.request(...)` em vez de executá-las direto (mudança pequena, comentada com `# JARVIS:`). Desligue o painel do celular por padrão com uma flag em `config/api_keys.json`. Registre tudo em `docs/mudancas-no-mark.md`, escreva testes para a política, rode `python main.py` e confirme que "mande uma mensagem para X" mostra o banner.
+> Leia o CLAUDE.md e docs/auditoria-mark.md (achados 1, 2 e 3). Corrija o `.gitignore` do Mark movendo os comentários para linhas próprias e acrescente `data/`. Crie `jarvis/brain/policy.py` com a lista de ações do Mark que exigem CONFIRM por clique e, em `main.py:1403`, encaminhe essas ações para `core.confirm.request(...)` em vez de executá-las direto (mudança pequena, comentada com `# JARVIS:`). Desligue o painel do celular por padrão com uma flag em `config/api_keys.json`. Corrija o achado 10: `close_app` nunca fecha janelas de shell do `explorer.exe` (área de trabalho, barra de tarefas), e "fechar o Explorer" fecha só as janelas de pasta. Registre tudo em `docs/mudancas-no-mark.md`, escreva testes para a política, rode `python main.py` e confirme que "mande uma mensagem para X" mostra o banner.
 
 ### 1. Pacote `jarvis/` e plugin de entrada (até 29/10)
 
