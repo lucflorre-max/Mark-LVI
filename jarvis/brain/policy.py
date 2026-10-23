@@ -59,6 +59,8 @@ _SAFE: dict[str, frozenset[str]] = {
     # criar ainda pede o "sim" por voz antes de salvar (jarvis/tasks/service.py).
     # Uma ação nova que não estiver aqui pede CONFIRM até ser classificada.
     "jarvis_tarefas": frozenset({"criar", "listar_hoje", "concluir", "desfazer"}),
+    # Perfil de comunicação: ler, esquecer e rejeitar não criam preferência.
+    "jarvis_perfil": frozenset({"sugestoes", "listar", "esquecer", "rejeitar"}),
 }
 
 # Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
@@ -75,6 +77,8 @@ _VOZ: dict[str, frozenset[str]] = {
         "undo", "redo", "select_all", "close_window", "close_tab",
         "refresh_page", "go_back", "go_forward", "task_manager", "file_explorer",
     }),
+    # Preferência permanente só depois de um "sim" (CLAUDE.md).
+    "jarvis_perfil": frozenset({"lembrar"}),
 }
 
 DIRETO, VOZ, CLIQUE = "direto", "voz", "clique"
@@ -83,6 +87,7 @@ DIRETO, VOZ, CLIQUE = "direto", "voz", "clique"
 _DEFAULT_ACTION = {
     "code_helper": "auto",       # padrão do code_helper, que pode executar código
     "jarvis_tarefas": "criar",
+    "jarvis_perfil": "sugestoes",
 }
 
 # As categorias do CLAUDE.md e onde cada uma está coberta. Documentação viva:
@@ -120,6 +125,7 @@ LABELS: dict[str, str] = {
     "reminder":          "Agendar lembrete",
     "game_updater":      "Atualizar ou instalar jogos",
     "jarvis_tarefas":    "Tarefas",
+    "jarvis_perfil":     "Lembrar do seu jeito de falar",
 }
 
 _ACTION_KEYS = ("action", "mode", "acao")

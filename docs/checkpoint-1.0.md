@@ -23,6 +23,16 @@ Roteiro de teste por voz da M1. Transcrições completas em `data/conversas/` (f
 - **Ação sem sentido:** pedido de "mostrar em pop-up" virou `screen_find` + mover o mouse. Inofensivo, mas é ruído; observar nas próximas sessões.
 - **Reabrir por voz depois de fechar:** "fechar" (`shutdown_jarvis`) encerra o programa; a palavra de ativação só funciona com ele aberto. Precisa de modo "em espera" + início com o Windows → Meta 7.
 
-## Sessão 2
+## Sessão 2 — 23/10/2026, 15:46 a 15:48
 
-*(pendente: B6 e C7–C11)*
+Encerrada pelo usuário (fechou a janela); não foi queda. Os testes de mensagem e tarefas não chegaram a ser feitos.
+
+- ✅ Briefing com notícia do Brasil (BYD), depois da troca da busca.
+- ✅ Notícia do GZH sobre o Inter encontrada.
+- ❌ **Transcrição de português como inglês**: "The price is for you", "My face? Okay…". Uma delas fez o modelo tirar um print da tela sem motivo. Corrigido com `language_codes=["pt-BR"]` e vocabulário na transcrição (aceito pelo servidor em teste de conexão). Efeito no entendimento do modelo: Provável, a confirmar.
+- Pedido do usuário: digitar/clicar sem clique → "sim" por voz.
+- Pedido do usuário: aprender o jeito de falar → perfil de comunicação (base da M5).
+
+## Sessão 3
+
+*(pendente: "sim" por voz, mensagem com CANCEL, C7–C11 e `jarvis_perfil`)*

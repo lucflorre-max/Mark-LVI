@@ -19,6 +19,7 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `main.py:1185-1186` | `input_audio_transcription` com `language_codes=["pt-BR"]` e vocabulário (`jarvis_config.transcricao_entrada()`) | O Live transcrevia português como inglês ("The price is for you"); aceito pelo servidor em teste de conexão | M1 |
 | 23/10/2026 | `main.py` (input_transcription) | `jarvis_gate.ouvir(txt)` a cada trecho da voz do usuário | "Sim" por voz para digitar/teclar/clicar vem do microfone, não de um parâmetro do modelo | M1 |
 | 23/10/2026 | `core/prompt.txt` ([EXECUTION]) | Explica `[VOICE_CONFIRM]` e `[VOICE_DECLINED]`; digitar/clicar saem do botão | Nova regra de confirmação escolhida pelo usuário | M1 |
+| 23/10/2026 | `main.py` (import + `parts`) | `parts.append(jarvis_perfil.bloco_prompt())` antes do prompt | Expressões aprovadas pelo usuário entram em cada sessão ('' quando vazio) | M1 → base da M5 |
 | 23/10/2026 | `config/api_keys.json` (local) | `"hud_style": "core"` | Núcleo circular em vez do rosto (configuração, sem código) | M1 tarefa 2 |
 | 23/10/2026 | `main.py:85, 1289, 1443, 1720, 1740` | Transcrição local: fala do usuário, resposta, ferramenta e resultado vão para `jarvis/memory/transcript.py` | Analisar conversas reais para melhorar o JARVIS; desligar com `"transcript_enabled": false` | M1 (extra) |
 

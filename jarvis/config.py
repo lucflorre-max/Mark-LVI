@@ -60,7 +60,13 @@ def transcricao_entrada() -> dict:
     transcreveu português como inglês ("The price is for you"). Aceito pelo
     servidor em 23/10/2026 (teste de conexão com gemini-3.1-flash-live-preview).
     """
-    return {"language_codes": [IDIOMA], "custom_vocabulary": list(VOCABULARIO)}
+    vocab = list(VOCABULARIO)
+    try:
+        from jarvis.memory import perfil   # vocabulário que o usuário aprovou
+        vocab += [v for v in perfil.vocabulario_aprovado() if v not in vocab]
+    except Exception as e:
+        print(f"[Config] perfil indisponível: {e}")
+    return {"language_codes": [IDIOMA], "custom_vocabulary": vocab}
 
 
 def dashboard_enabled() -> bool:

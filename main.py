@@ -83,6 +83,7 @@ from core                      import confirm as confirm_gate
 from jarvis.brain              import gate as jarvis_gate  # JARVIS: portão de confirmação
 from jarvis                    import config as jarvis_config  # JARVIS: flags do JARVIS
 from jarvis.memory             import transcript as jarvis_transcript  # JARVIS: data/conversas/
+from jarvis.memory             import perfil as jarvis_perfil  # JARVIS: data/perfil.json
 from core                      import audio_devices
 from core.action_loader        import discover_actions
 from core.echo                 import EchoGuard
@@ -1175,6 +1176,7 @@ class JarvisLive:
         parts = [time_ctx, identity_ctx]
         if mem_str:
             parts.append(mem_str)
+        parts.append(jarvis_perfil.bloco_prompt())  # JARVIS: como o usuário se comunica ('' se vazio)
         parts.append(sys_prompt)
 
         cfg = dict(

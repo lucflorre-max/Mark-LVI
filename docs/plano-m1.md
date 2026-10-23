@@ -30,6 +30,8 @@ O plano diz que, se a auditoria mandar substituir algo, a auditoria vence. Confe
   - `confirmado=true` só vale depois de o resumo ser mostrado, e qualquer mudança de campo exige novo resumo.
   - "Desfazer" usa a pilha de `core/undo.py`, então o `undo` do Mark também desfaz tarefas.
 - Tarefa 5 — concluída. `jarvis_tarefas` está na política; ação nova pede CONFIRM até ser classificada; `CATEGORIAS_CONFIRM` testa as categorias do CLAUDE.md.
+- Extra (pedido do usuário) — "sim" por voz para digitar/teclar/clicar (`feature/m1-confirmacao-voz`) e transcrição da voz com dica pt-BR.
+- Extra (pedido do usuário, **adianta a M5**) — perfil de comunicação (`feature/m1-perfil`): análise local das transcrições sugere vocabulário e expressões; plugin `jarvis_perfil` salva só com "sim" falado em `data/perfil.json`; vocabulário vai para o reconhecimento de voz e expressões para o prompt. Na M5: migrar para o SQLite da memória e somar preferências.
 - **Testes por voz pendentes** (quando o usuário puder falar): banner da tarefa 0, tarefa 2 (persona) e roteiro da tarefa 4. Depois, tarefa 6 (checkpoint 1.0).
 
 **Meta 0 fechada em 23/10/2026:** checkpoint 0.1 aprovado, falhas em `docs/checkpoint-0.1.md`.
