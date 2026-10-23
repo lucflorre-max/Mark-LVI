@@ -19,3 +19,9 @@ def dashboard_enabled() -> bool:
     """Painel do celular. Desligado até alguém pôr "dashboard_enabled": true
     em config/api_keys.json (auditoria, achado 3)."""
     return _keys().get("dashboard_enabled") is True
+
+
+def transcript_enabled() -> bool:
+    """Transcrição local em data/conversas/. Ligada até alguém pôr
+    "transcript_enabled": false em config/api_keys.json."""
+    return _keys().get("transcript_enabled") is not False
