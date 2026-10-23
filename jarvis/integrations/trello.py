@@ -211,6 +211,12 @@ def usar_quadro(cliente: TrelloClient, alvo: str) -> str:
             f"concluídas em '{nomes['feito']}'.{extra}")
 
 
+def _limpar(texto: str) -> str:
+    """Tira espaços e caracteres de controle. No console do Windows, Ctrl+V
+    dentro do getpass entra como o caractere ^V em vez de colar."""
+    return "".join(c for c in texto if c.isprintable() and not c.isspace())
+
+
 def _main(argv: list[str]) -> int:
     cmd = argv[1] if len(argv) > 1 else "status"
     cliente = TrelloClient()
@@ -218,10 +224,16 @@ def _main(argv: list[str]) -> int:
         if cmd == "chave":
             from getpass import getpass
             print("Cole a chave (API key) e o token do Trello. Nada aparece na tela.")
-            key = getpass("Chave: ").strip()
-            token = getpass("Token: ").strip()
+            key = _limpar(getpass("Chave: "))
+            token = _limpar(getpass("Token: "))
+            # Só os tamanhos, nunca os valores: a chave tem 32 caracteres e o
+            # token começa com ATTA e tem uns 76.
+            print(f"Recebi uma chave com {len(key)} caracteres e um token com "
+                  f"{len(token)} caracteres"
+                  f"{' (começa com ATTA)' if token.startswith('ATTA') else ''}.")
             if not (key and token):
-                print("Chave ou token vazio; nada foi salvo.")
+                print("Chave ou token vazio; nada foi salvo. Cole com o botão "
+                      "direito do mouse (Ctrl+V não funciona aqui).")
                 return 1
             dados = dict(cliente.dados)
             dados.update(key=key, token=token)
