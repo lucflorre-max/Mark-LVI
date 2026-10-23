@@ -17,7 +17,10 @@ PLUGIN = {
         "`reminder`, não esta ferramenta. Extraia os campos da fala; deixe "
         "vazio o que ele não disse, nunca invente prazo, prioridade ou duração. "
         "A ferramenta pergunta o que falta e devolve um resumo; só mande "
-        "confirmado=true depois que o usuário disser sim a esse resumo."
+        "confirmado=true depois que o usuário disser sim a esse resumo. "
+        "Depois de salva, a tarefa vai para o Trello e, se tiver hora, ganha "
+        "um compromisso na agenda que o usuário confirma na tela; diga onde "
+        "cada item ficou, como a ferramenta informar."
     ),
     "parameters": {
         "type": "OBJECT",

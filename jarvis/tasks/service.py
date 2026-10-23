@@ -14,6 +14,10 @@ FLUXO DE `criar` (docs/plano-m1.md, tarefa 4)
     "Depois eu vejo isso" → pergunta o prazo; se o usuário mantiver o prazo
     indefinido (prazo="indefinido"), a tarefa vai para a caixa de entrada.
 
+M2 tarefa 5: o resumo diz para onde a tarefa vai, e depois de salva ela ganha
+um cartão no Trello e, se tiver hora, um compromisso vinculado no Calendar
+(que espera o clique). Detalhes em jarvis/tasks/sincronia.py.
+
 As respostas são instruções para o modelo, em português; ele fala com as
 próprias palavras. Nada aqui levanta exceção para fora.
 """
@@ -26,6 +30,7 @@ from datetime import date, datetime, timedelta
 
 from jarvis import config
 from jarvis.brain import gate
+from jarvis.tasks import sincronia
 from jarvis.tasks.repository import (
     TaskRepository, Tarefa, normalizar_duracao, normalizar_prazo,
     normalizar_prioridade,
@@ -148,7 +153,7 @@ def _vazio(valor) -> bool:
     return valor is None or (isinstance(valor, str) and not valor.strip())
 
 
-def _criar(p: dict) -> str:
+def _criar(p: dict, player=None) -> str:
     global _rascunho
     titulo = (p.get("titulo") or "").strip()
 
@@ -221,8 +226,9 @@ def _criar(p: dict) -> str:
         if not (p.get("confirmado") is True and r.resumo_mostrado):
             _rascunho = replace(r, resumo_mostrado=True, faltas=[])
             return (f"Resumo para o usuário aprovar: {_resumo(r)}. Ainda NÃO foi "
-                    f"salva. Diga o resumo em uma frase e pergunte se pode salvar. "
-                    f"Se ele disser sim, chame de novo com confirmado=true.")
+                    f"salva.{sincronia.destino(r.prazo)} Diga o resumo em uma "
+                    f"frase e pergunte se pode salvar. Se ele disser sim, chame "
+                    f"de novo com confirmado=true.")
 
         _rascunho = None
 
@@ -231,11 +237,13 @@ def _criar(p: dict) -> str:
         duracao_min=r.duracao_min, projeto=r.projeto,
     )
     _registrar_undo(f"criei a tarefa: {t.titulo}", lambda: _desfazer_criar(t.id))
-    return (f"Salva: {_fmt_tarefa(t)}. Confirme ao usuário em poucas palavras; "
-            f"ele pode dizer 'desfaz' para remover.")
+    destinos = sincronia.depois_de_salvar(_repositorio(), t, player,
+                                          hoje=_agora_sp().date())
+    return (f"Salva: {_fmt_tarefa(t)}.{destinos} Confirme ao usuário em poucas "
+            f"palavras, dizendo onde ficou; ele pode dizer 'desfaz' para remover.")
 
 
-def _listar_hoje(p: dict) -> str:
+def _listar_hoje(p: dict, player=None) -> str:
     repo = _repositorio()
     tarefas = repo.listar_dia(_agora_sp().date())
     inbox = len(repo.listar_inbox())
@@ -250,7 +258,7 @@ def _listar_hoje(p: dict) -> str:
     return texto + " Resuma para o usuário, sem ler os ids."
 
 
-def _concluir(p: dict) -> str:
+def _concluir(p: dict, player=None) -> str:
     repo = _repositorio()
     alvo = None
     if not _vazio(p.get("tarefa_id")):
@@ -273,10 +281,12 @@ def _concluir(p: dict) -> str:
     feita = repo.concluir(alvo.id)
     _registrar_undo(f"concluí a tarefa: {feita.titulo}",
                     lambda: _desfazer_concluir(feita.id))
-    return f"Concluída: {feita.titulo}. Confirme ao usuário em poucas palavras."
+    trello_txt = sincronia.mover(feita, "feito")
+    return (f"Concluída: {feita.titulo}.{trello_txt} Confirme ao usuário em "
+            f"poucas palavras.")
 
 
-def _desfazer(p: dict) -> str:
+def _desfazer(p: dict, player=None) -> str:
     try:
         return _pilha_undo().undo_last()
     except Exception as e:
@@ -294,12 +304,16 @@ def _registrar_undo(rotulo: str, fn) -> None:
 
 def _desfazer_criar(tarefa_id: int) -> str:
     t = _repositorio().apagar(tarefa_id)
-    return f"Tarefa removida: {t.titulo}." if t else "A tarefa já não existia."
+    if not t:
+        return "A tarefa já não existia."
+    return f"Tarefa removida: {t.titulo}.{sincronia.arquivar(t)}"
 
 
 def _desfazer_concluir(tarefa_id: int) -> str:
     t = _repositorio().reabrir(tarefa_id)
-    return f"Tarefa reaberta: {t.titulo}." if t else "A tarefa já não existia."
+    if not t:
+        return "A tarefa já não existia."
+    return f"Tarefa reaberta: {t.titulo}.{sincronia.mover(t, 'a_fazer')}"
 
 
 def _desfazer_inbox(item_id: int) -> str:
@@ -322,11 +336,11 @@ def handle(parameters: dict, player=None) -> str:
         if acao not in _HANDLERS:
             return f"Ação '{acao}' desconhecida. Use uma destas: {', '.join(ACOES)}."
         # Tarefa 5: o que a política marcar como irreversível espera o CONFIRM.
-        pendente = gate.guard("jarvis_tarefas", p, lambda: _HANDLERS[acao](p),
+        pendente = gate.guard("jarvis_tarefas", p, lambda: _HANDLERS[acao](p, player),
                               confirm=_confirm)
         if pendente is not None:
             return pendente
-        resposta = _HANDLERS[acao](p)
+        resposta = _HANDLERS[acao](p, player)
         if player is not None:
             try:
                 player.write_log(f"JARVIS: tarefas/{acao}")

@@ -9,6 +9,10 @@ Datas em ISO 8601 no fuso de São Paulo:
     prazo só com dia → "2026-10-24"
 Os dez primeiros caracteres são sempre o dia, o que torna "listar por dia"
 uma comparação simples.
+
+Versão 2 do banco (M2 tarefa 5): a tarefa guarda os vínculos com o Trello e o
+Google Calendar (documento-mestre §18). Bancos da versão 1 ganham as colunas
+na abertura.
 """
 
 from __future__ import annotations
@@ -52,8 +56,11 @@ CREATE TABLE IF NOT EXISTS inbox (
     processado  INTEGER NOT NULL DEFAULT 0,
     criado_em   TEXT NOT NULL
 );
-PRAGMA user_version = 1;
 """
+
+# Colunas da versão 2: vínculos com o Trello e o Calendar.
+VINCULOS = ("trello_card_id", "trello_url", "calendar_event_id", "calendar_url")
+_VERSAO = 2
 
 
 @dataclass(frozen=True)
@@ -69,6 +76,10 @@ class Tarefa:
     origem: str
     criado_em: str
     atualizado_em: str
+    trello_card_id: str | None = None
+    trello_url: str | None = None
+    calendar_event_id: str | None = None
+    calendar_url: str | None = None
 
 
 @dataclass(frozen=True)
@@ -133,8 +144,18 @@ class TaskRepository:
         conn = self._conn()
         try:
             conn.executescript(_SCHEMA)
+            self._migrar(conn)
         finally:
             conn.close()
+
+    @staticmethod
+    def _migrar(conn: sqlite3.Connection) -> None:
+        colunas = {r[1] for r in conn.execute("PRAGMA table_info(tasks)")}
+        with conn:
+            for nome in VINCULOS:
+                if nome not in colunas:
+                    conn.execute(f"ALTER TABLE tasks ADD COLUMN {nome} TEXT")
+            conn.execute(f"PRAGMA user_version = {_VERSAO}")
 
     def _conn(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.path, timeout=5)
@@ -220,6 +241,19 @@ class TaskRepository:
     def adiar(self, tarefa_id: int, novo_prazo) -> Tarefa | None:
         cur = self._run("UPDATE tasks SET prazo = ?, atualizado_em = ? WHERE id = ?",
                         (normalizar_prazo(novo_prazo), agora(), tarefa_id))
+        return self.obter(tarefa_id) if cur.rowcount else None
+
+    def vincular(self, tarefa_id: int, **links: str | None) -> Tarefa | None:
+        """Grava os vínculos (trello_card_id, trello_url, calendar_event_id,
+        calendar_url). Só os nomes de VINCULOS são aceitos."""
+        if not links:
+            return self.obter(tarefa_id)
+        estranhos = set(links) - set(VINCULOS)
+        if estranhos:
+            raise ValueError(f"vínculo desconhecido: {', '.join(sorted(estranhos))}")
+        sets = ", ".join(f"{k} = ?" for k in links)
+        cur = self._run(f"UPDATE tasks SET {sets}, atualizado_em = ? WHERE id = ?",
+                        (*links.values(), agora(), tarefa_id))
         return self.obter(tarefa_id) if cur.rowcount else None
 
     def apagar(self, tarefa_id: int) -> Tarefa | None:
