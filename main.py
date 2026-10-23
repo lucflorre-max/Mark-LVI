@@ -82,6 +82,7 @@ from core                      import undo as undo_stack
 from core                      import confirm as confirm_gate
 from jarvis.brain              import gate as jarvis_gate  # JARVIS: portão de confirmação
 from jarvis                    import config as jarvis_config  # JARVIS: flags do JARVIS
+from jarvis.memory             import transcript as jarvis_transcript  # JARVIS: data/conversas/
 from core                      import audio_devices
 from core.action_loader        import discover_actions
 from core.echo                 import EchoGuard
@@ -1285,6 +1286,7 @@ class JarvisLive:
         args = dict(fc.args or {})
 
         print(f"[JARVIS] 🔧 {name}  {args}")
+        jarvis_transcript.tool(name, args)  # JARVIS: transcrição
         self.ui.set_state("THINKING")
 
 
@@ -1438,6 +1440,7 @@ class JarvisLive:
             self.ui.set_state("LISTENING")
 
         print(f"[JARVIS] 📤 {name} → {str(result)[:80]}")
+        jarvis_transcript.result(name, result)  # JARVIS: transcrição
 
         # A tool that declared itself NON_BLOCKING also says when its answer may
         # re-enter the conversation. Without this the model finishes whatever it
@@ -1714,6 +1717,7 @@ class JarvisLive:
                             if full_in:
                                 self._last_out_logged = ""   # new exchange
                                 self.ui.write_log(f"You: {full_in}")
+                                jarvis_transcript.user(full_in)  # JARVIS: transcrição
                                 self._session_log.append(f"User: {full_in}")
                                 if self._dashboard:
                                     asyncio.create_task(self._dashboard.broadcast({
@@ -1733,6 +1737,7 @@ class JarvisLive:
                             if full_out:
                                 self._last_out_logged = full_out
                                 self.ui.write_log(f"{self._asst_name}: {full_out}")
+                                jarvis_transcript.assistant(self._asst_name, full_out)  # JARVIS: transcrição
                                 self._session_log.append(f"{self._asst_name}: {full_out}")
                                 if self._dashboard:
                                     asyncio.create_task(self._dashboard.broadcast({
