@@ -30,7 +30,7 @@ from datetime import date, datetime, timedelta
 
 from jarvis import config
 from jarvis.brain import gate
-from jarvis.tasks import sincronia
+from jarvis.tasks import cards, sincronia
 from jarvis.tasks.repository import (
     TaskRepository, Tarefa, normalizar_duracao, normalizar_prazo,
     normalizar_prioridade,
@@ -143,6 +143,25 @@ def _resumo(r: _Rascunho) -> str:
     return ", ".join(partes)
 
 
+def _mostrar(player, card: tuple[str, str]) -> None:
+    """Card na tela (M1B). Sem tela, ou se ela falhar, a voz segue igual."""
+    if player is not None:
+        try:
+            player.show_content(*card)
+        except Exception:
+            pass
+
+
+def _card_rascunho(r: _Rascunho, faltas: list[str] | None = None):
+    campos = {"Prazo": fmt_prazo(r.prazo) if r.prazo else None,
+              "Prioridade": _fmt_prioridade(r.prioridade).removeprefix("prioridade ")
+              if r.prioridade else None,
+              "Duração": fmt_duracao(r.duracao_min) if r.duracao_min else None}
+    if r.projeto:
+        campos["Projeto"] = r.projeto
+    return cards.rascunho(r.titulo, campos, sincronia.destinos(r.prazo), faltas or [])
+
+
 def _fmt_tarefa(t: Tarefa) -> str:
     return f"{t.titulo} ({fmt_prazo(t.prazo)}, {_fmt_prioridade(t.prioridade)})"
 
@@ -215,6 +234,7 @@ def _criar(p: dict, player=None) -> str:
             pedir = [erros.get(f, f) for f in faltas]
             r = replace(r, faltas=faltas, resumo_mostrado=False)
             _rascunho = r
+            _mostrar(player, _card_rascunho(r, faltas))
             extra = (" O usuário adiou o prazo; pergunte quando ele quer fazer, "
                      "e se ele mantiver indefinido chame de novo com "
                      "prazo='indefinido'.") if r.prazo_indefinido else ""
@@ -225,6 +245,7 @@ def _criar(p: dict, player=None) -> str:
 
         if not (p.get("confirmado") is True and r.resumo_mostrado):
             _rascunho = replace(r, resumo_mostrado=True, faltas=[])
+            _mostrar(player, _card_rascunho(r))
             return (f"Resumo para o usuário aprovar: {_resumo(r)}. Ainda NÃO foi "
                     f"salva.{sincronia.destino(r.prazo)} Diga o resumo em uma "
                     f"frase e pergunte se pode salvar. Se ele disser sim, chame "
@@ -247,12 +268,13 @@ def _listar_hoje(p: dict, player=None) -> str:
     repo = _repositorio()
     tarefas = repo.listar_dia(_agora_sp().date())
     inbox = len(repo.listar_inbox())
+    _mostrar(player, cards.lista_do_dia(tarefas, _agora_sp(), inbox))
     if not tarefas:
         texto = "Nenhuma tarefa com prazo para hoje."
     else:
         linhas = "; ".join(f"{i}. {_fmt_tarefa(t)} [id {t.id}]"
                            for i, t in enumerate(tarefas, 1))
-        texto = f"{len(tarefas)} tarefa(s) para hoje: {linhas}."
+        texto = f"{len(tarefas)} tarefa(s) para hoje: {linhas}. O card está na tela."
     if inbox:
         texto += f" Há {inbox} item(ns) na caixa de entrada sem prazo."
     return texto + " Resuma para o usuário, sem ler os ids."
@@ -282,6 +304,7 @@ def _concluir(p: dict, player=None) -> str:
     _registrar_undo(f"concluí a tarefa: {feita.titulo}",
                     lambda: _desfazer_concluir(feita.id))
     trello_txt = sincronia.mover(feita, "feito")
+    _mostrar(player, cards.concluida(feita, trello_txt.replace(" no Trello", "")))
     return (f"Concluída: {feita.titulo}.{trello_txt} Confirme ao usuário em "
             f"poucas palavras.")
 

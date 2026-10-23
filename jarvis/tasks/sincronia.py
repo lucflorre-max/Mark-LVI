@@ -75,6 +75,18 @@ def _mostrar(player, titulo: str, texto: str) -> None:
 
 # ── Texto ────────────────────────────────────────────────────────────────────
 
+def destinos(prazo: str | None) -> list[str]:
+    """Onde a tarefa vai ficar, curto, para o card: ['JARVIS', 'Trello (A fazer)', 'Agenda']."""
+    if _desligada:
+        return []
+    lugares = ["JARVIS"]
+    if trello_ativo():
+        lugares.append(f"Trello ({_cliente_trello().nome_lista('a_fazer')})")
+    if tem_hora(prazo) and calendario_ativo():
+        lugares.append("Agenda (confirmar na tela)")
+    return lugares
+
+
 def destino(prazo: str | None) -> str:
     """Para o resumo antes do "sim": onde a tarefa vai ficar."""
     if _desligada:
