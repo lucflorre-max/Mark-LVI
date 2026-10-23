@@ -229,3 +229,15 @@ def test_banco_antigo_ganha_as_colunas_de_vinculo(tmp_path):
     assert t.titulo == "antiga" and t.trello_url == "https://trello.com/c/x"
     with pytest.raises(ValueError):
         repo.vincular(1, titulo="hack")
+
+
+def test_tarefa_com_hora_em_cima_de_compromisso_avisa_no_banner(mundo, monkeypatch):
+    repo, tr, cal, conf, _ = mundo
+    monkeypatch.setattr(cal, "eventos", lambda ini, fim: [{
+        "id": "r", "summary": "Reunião",
+        "start": {"dateTime": "2026-10-27T14:00:00-03:00"},
+        "end": {"dateTime": "2026-10-27T15:00:00-03:00"}}])
+    _, out = _salvar(COM_HORA)
+    _, _, detalhe, _ = conf.pedido
+    assert "conflita com “Reunião” (14h–15h)" in detalhe and "15h–15h45" in detalhe
+    assert "conflita" in out and cal.criados == []

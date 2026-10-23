@@ -103,10 +103,13 @@ def card(eventos: list[Evento], dia: date, agora: datetime) -> tuple[str, str]:
     if not eventos:
         return titulo, "Nada marcado."
     linhas = []
+    batem = sobrepostos(eventos)
     for e in ordenar(eventos):
-        marca = "▶ " if em_andamento(e, agora) else ""
+        marca = "▶ " if em_andamento(e, agora) else ("⚠ " if e in batem else "")
         local = f" · {e.local}" if e.local else ""
         linhas.append(f"{marca}{_faixa(e, dia, fala=False):<13}{e.titulo}{local}")
+    if batem:
+        linhas.append("⚠ horários que se sobrepõem")
     return titulo, "\n".join(linhas)
 
 
@@ -125,3 +128,68 @@ def para_fala(eventos: list[Evento], dia: date) -> str:
     return "; ".join(f"{_faixa(e, dia, fala=True)} {e.titulo}"
                      + (f" ({e.local})" if e.local else "")
                      for e in ordenar(eventos))
+
+
+# ── Conflitos (M2 tarefa 6) ──────────────────────────────────────────────────
+# Só analisam e sugerem. Nada aqui altera a agenda (documento-mestre §5.1).
+
+FIM_DO_EXPEDIENTE = time(21, 0)   # a sugestão de encaixe não passa disto
+PASSO_MIN = 15                    # sugestões em múltiplos de 15 minutos
+
+
+def conflitos(eventos: list[Evento], ini: datetime, fim: datetime,
+              ignorar_id: str = "") -> list[Evento]:
+    """Compromissos com hora que se sobrepõem a [ini, fim). Os de dia inteiro
+    (feriado, aniversário) não ocupam horário."""
+    return ordenar([e for e in eventos
+                    if not e.dia_inteiro and e.inicio and e.fim
+                    and (not ignorar_id or e.id != ignorar_id)
+                    and e.inicio < fim and e.fim > ini])
+
+
+def sobrepostos(eventos: list[Evento]) -> list[Evento]:
+    """Os compromissos do dia que batem com algum outro."""
+    com_hora = [e for e in eventos if not e.dia_inteiro and e.inicio and e.fim]
+    return [e for i, e in enumerate(com_hora)
+            if any(i != j and o.inicio < e.fim and o.fim > e.inicio
+                   for j, o in enumerate(com_hora))]
+
+
+def _arredondar(dt: datetime) -> datetime:
+    """Sobe para o próximo múltiplo de 15 minutos (14h50 → 15h; 15h → 15h)."""
+    cheio = dt.replace(second=0, microsecond=0)
+    if cheio < dt:
+        cheio += timedelta(minutes=1)
+    return cheio + timedelta(minutes=-cheio.minute % PASSO_MIN)
+
+
+def proximo_livre(eventos: list[Evento], ini: datetime,
+                  duracao: timedelta) -> datetime | None:
+    """Primeiro início a partir de `ini` em que cabe `duracao` sem conflito,
+    no mesmo dia e até FIM_DO_EXPEDIENTE. None quando não cabe mais."""
+    limite = datetime.combine(ini.date(), FIM_DO_EXPEDIENTE, tzinfo=ini.tzinfo)
+    candidato = ini
+    for _ in range(100):
+        if candidato + duracao > limite:
+            return None
+        batem = conflitos(eventos, candidato, candidato + duracao)
+        if not batem:
+            return candidato
+        candidato = _arredondar(max(e.fim for e in batem))
+    return None
+
+
+def aviso_conflito(eventos: list[Evento], ini: datetime, fim: datetime) -> str:
+    """'' sem conflito; senão ' — conflita com “Reunião” (14h–15h); livre a
+    partir de 15h–15h45'. Para o banner, o card e o modelo."""
+    batem = conflitos(eventos, ini, fim)
+    if not batem:
+        return ""
+    nomes = "; ".join(f"“{e.titulo}” ({_faixa(e, ini.date(), fala=True)})" for e in batem)
+    livre = proximo_livre(eventos, ini, fim - ini)
+    if livre is None:
+        sugestao = "não há outro horário livre com essa duração até as 21h"
+    else:
+        sugestao = (f"horário livre mais próximo: {_hora_fala(livre)}–"
+                    f"{_hora_fala(livre + (fim - ini))}")
+    return f" — conflita com {nomes}; {sugestao}"

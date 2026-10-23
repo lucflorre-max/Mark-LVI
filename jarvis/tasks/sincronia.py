@@ -222,8 +222,18 @@ def depois_de_salvar(repo: TaskRepository, t: Tarefa, player=None,
 
 
 def aviso_conflito(t: Tarefa, hoje: date) -> str:
-    """'' sem conflito. Preenchido na M2 tarefa 6."""
-    return ""
+    """'' sem conflito; senão com quem bate e o horário livre mais próximo
+    (M2 tarefa 6). Só informa: nada é movido."""
+    from jarvis.calendar import agenda
+    ini = datetime.fromisoformat(t.prazo)
+    fim = ini + timedelta(minutes=t.duracao_min or 60)
+    try:
+        d_ini, d_fim = agenda.limites_do_dia(ini.date(), config.fuso())
+        itens = _cliente_calendario().eventos(d_ini, d_fim)
+    except Exception:
+        return ""
+    eventos = [e for e in (agenda.de_api(i, config.fuso()) for i in itens) if e]
+    return agenda.aviso_conflito(eventos, ini, fim)
 
 
 # ── Concluir e desfazer ──────────────────────────────────────────────────────
