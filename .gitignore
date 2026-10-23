@@ -20,6 +20,8 @@ config/whatsapp_web/
 **/client_secret*.json
 # JARVIS: credenciais e tokens do Google (Calendar) do JARVIS
 config/google/
+# JARVIS: chave e token do Trello do JARVIS
+config/trello.json
 *credentials*.json
 .env
 .env.*
