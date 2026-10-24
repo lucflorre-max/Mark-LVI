@@ -226,6 +226,19 @@ class TaskRepository:
         sql += " ORDER BY length(prazo) = 10, prazo, id"
         return [Tarefa(**dict(r)) for r in self._rows(sql, (dia,))]
 
+    def listar_abertas(self, ate=None) -> list[Tarefa]:
+        """Abertas com prazo até o dia `ate` (inclusive, atrasadas junto) e as
+        sem prazo. Sem `ate`, todas as abertas. Base do motor de prioridade."""
+        sql, params = "SELECT * FROM tasks WHERE status = 'aberta'", []
+        if ate is not None:
+            ate = ate.isoformat() if isinstance(ate, date) else str(ate)[:10]
+            sql += " AND (prazo IS NULL OR substr(prazo, 1, 10) <= ?)"
+            params.append(ate)
+        return [Tarefa(**dict(r)) for r in self._rows(sql + " ORDER BY id", params)]
+
+    def nomes_projetos(self) -> dict[int, str]:
+        return {r["id"]: r["nome"] for r in self._rows("SELECT id, nome FROM projects")}
+
     def _status(self, tarefa_id: int, status: str) -> Tarefa | None:
         cur = self._run("UPDATE tasks SET status = ?, atualizado_em = ? WHERE id = ?",
                         (status, agora(), tarefa_id))
