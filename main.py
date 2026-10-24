@@ -84,6 +84,7 @@ from jarvis.brain              import gate as jarvis_gate  # JARVIS: portão de 
 from jarvis                    import config as jarvis_config  # JARVIS: flags do JARVIS
 from jarvis.memory             import transcript as jarvis_transcript  # JARVIS: data/conversas/
 from jarvis.memory             import perfil as jarvis_perfil  # JARVIS: data/perfil.json
+from jarvis.interface          import noticias as jarvis_noticias  # JARVIS: card com foto
 from core                      import audio_devices
 from core.action_loader        import discover_actions
 from core.echo                 import EchoGuard
@@ -1422,7 +1423,10 @@ class JarvisLive:
                     # unwrap: the untrusted markers are for the MODEL. Showing
                     # them to the person who asked for the search is the
                     # machinery leaking into the interface.
-                    self.ui.show_content(_label, outcome.unwrap(r))
+                    if _mode == "news":   # JARVIS: card com a foto da principal
+                        jarvis_noticias.mostrar(self.ui, f"NOTÍCIAS — {_query[:36]}", outcome.unwrap(r))
+                    else:
+                        self.ui.show_content(_label, outcome.unwrap(r))
 
             else:
                 if self._plugin_registry.has(name):
@@ -2019,7 +2023,8 @@ class JarvisLive:
                 )
                 if not failed:
                     # Show on UI content panel immediately
-                    self.ui.show_content("NEWS — top world news today", news_text)
+                    # JARVIS: card com a foto da principal; sem foto, o texto de antes
+                    jarvis_noticias.mostrar(self.ui, "NOTÍCIAS — Brasil hoje", news_text)
 
                     p2 = (
                         f"[BRIEFING] Here are today's top news headlines:\n{news_text}\n\n"

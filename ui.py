@@ -4278,6 +4278,7 @@ class MainWindow(QMainWindow):
     _quiz_sig       = pyqtSignal(str, object, object)  # (topic, questions, grader)
     _quiz_hide_sig  = pyqtSignal()
     _review_sig     = pyqtSignal(str, str, object, object)  # document review payload
+    _news_sig       = pyqtSignal(str, object, object, object)  # JARVIS: (título, itens, foto, índice)
 
     def __init__(self, face_path: str):
         super().__init__()
@@ -4561,6 +4562,7 @@ class MainWindow(QMainWindow):
         self._quiz_sig.connect(self._show_quiz)
         self._quiz_hide_sig.connect(self._hide_quiz)
         self._review_sig.connect(self._show_review)
+        self._news_sig.connect(self._show_news)  # JARVIS: card de notícias com foto
         self._cam_stop = threading.Event()
 
         # Camera preview overlay (child of central widget, positioned in resizeEvent)
@@ -5945,6 +5947,53 @@ class MainWindow(QMainWindow):
             total = self._center_split.height()
             self._center_split.setSizes([max(total - 260, 120), 260, 0])
 
+    # JARVIS: card de notícias com a foto da principal (jarvis/interface/noticias.py).
+    # Mesmo painel de conteúdo, em HTML como o _show_review. A foto entra como
+    # recurso do documento: o QTextEdit nunca busca nada na rede sozinho.
+    def _show_news(self, title: str, items, photo, photo_idx):
+        """Slot — Qt main thread."""
+        from PyQt6.QtGui import QImage, QTextDocument
+        import time as _time
+        e = self._esc
+        doc = self._content_display.document()
+        # clear() apaga também os recursos; a foto entra depois dele e o HTML
+        # vai por insertHtml, que não limpa (setHtml limparia a foto).
+        self._content_display.clear()
+        img_html = ""
+        if photo:
+            img = QImage()
+            if img.loadFromData(photo) and not img.isNull():
+                largura = max(160, min(self._content_display.viewport().width() - 24, 520))
+                img = img.scaledToWidth(largura, Qt.TransformationMode.SmoothTransformation)
+                url = QUrl(f"jarvis://noticia/{int(_time.time() * 1000)}")
+                doc.addResource(QTextDocument.ResourceType.ImageResource, url, img)
+                img_html = f'<img src="{url.toString()}" width="{img.width()}"><br>'
+        parts = [f'<div style="color:{C.TEXT}; font-family:Courier New;">']
+        for n, it in enumerate(items or []):
+            principal = n == photo_idx
+            parts.append('<div style="margin-bottom:10px;">')
+            if principal and img_html:
+                parts.append(img_html)
+            cor = C.WHITE if principal else C.TEXT
+            parts.append(f'<span style="color:{cor}; font-weight:bold;">{e(it.get("title"))}</span>')
+            if it.get("source"):
+                parts.append(f' <span style="color:{C.PRI_DIM};">[{e(it.get("source"))}]</span>')
+            if principal and it.get("snippet"):
+                parts.append(f'<div style="color:{C.TEXT_MED};">{e(str(it.get("snippet"))[:220])}</div>')
+            parts.append('</div>')
+        parts.append('</div>')
+        self.hud.glance(0.0, -0.85, hold=1.3)
+        self._content_title_lbl.setText(title.upper()[:48])
+        self._content_ts_lbl.setText(_time.strftime("%H:%M:%S"))
+        self._content_display.insertHtml("".join(parts))
+        self._content_display.moveCursor(
+            self._content_display.textCursor().MoveOperation.Start)
+        first_show = not self._content_panel.isVisible()
+        self._content_panel.show()
+        if first_show:
+            total = self._center_split.height()
+            self._center_split.setSizes([max(total - 300, 120), 300, 0])
+
     # ── quiz panel ───────────────────────────────────────────────────────────
     # An interactive twin of the content panel. The plugin only ever hands over
     # questions; everything about asking, marking and reporting happens here,
@@ -7161,6 +7210,11 @@ class JarvisUI:
         """
         self._win._review_sig.emit(str(title or ""), str(summary or ""),
                                    list(findings or []), list(unclear or []))
+
+    def show_news(self, title: str, items, photo: bytes | None = None,
+                  photo_idx: int | None = None) -> None:
+        """JARVIS: thread-safe — card de notícias, com a foto da principal."""
+        self._win._news_sig.emit(str(title or "")[:48], list(items or []), photo, photo_idx)
 
     def prompt_reconfig(self):
         """Thread-safe: show the API key setup overlay (e.g. after an auth error)."""

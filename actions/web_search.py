@@ -155,6 +155,8 @@ def _ddg_news(query: str, max_results: int = 8) -> list[dict]:
                     "snippet": r.get("body",   ""),
                     "url":     r.get("url",    ""),
                     "source":  r.get("source", ""),
+                    # JARVIS: foto da notícia para o card (jarvis/interface/noticias.py)
+                    "image":   r.get("image",  ""),
                 })
     except Exception as e:
         print(f"[WebSearch] ⚠️ DDG news() failed ({e}) — falling back to text search")
@@ -250,6 +252,16 @@ def _search(query: str) -> str:
         return _format_ddg(query, results)
 
 
+# JARVIS: notícias da última busca, para o card com foto do JARVIS.
+_ultimas: list[dict] = []
+
+
+def ultimas_noticias() -> list[dict]:
+    """JARVIS: cópia da lista da última busca de notícias ({title, snippet,
+    url, source, image}); vazia quando veio do Gemini ou falhou."""
+    return [dict(i) for i in _ultimas]
+
+
 def _news(query: str) -> str:
     """
     DDG first, Gemini as backup.
@@ -269,7 +281,14 @@ def _news(query: str) -> str:
     ddg_query    = query if query else "world news today"
 
     def _ddg_attempt() -> str:
-        return _format_news(ddg_query, _ddg_news(ddg_query, max_results=8))
+        # JARVIS: guarda a lista para o card com foto
+        global _ultimas
+        itens = _ddg_news(ddg_query, max_results=8)
+        _ultimas = itens
+        return _format_news(ddg_query, itens)
+
+    global _ultimas
+    _ultimas = []   # JARVIS: sem DDG não há lista (o Gemini devolve só texto)
 
     text = _run_bounded(_ddg_attempt, timeout=5.0, label="DDG news")
     if text and len(text) > 60 and not text.startswith("No news found"):
