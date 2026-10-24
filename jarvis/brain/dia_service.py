@@ -25,6 +25,7 @@ from jarvis.brain import linha_do_tempo as ldt
 from jarvis.brain import plano as pl
 from jarvis.brain import prioridade as pr
 from jarvis.brain import replanejar as rpl
+from jarvis.brain import rotinas as rt
 from jarvis.brain import sobrecarga as sc
 from jarvis.calendar import agenda
 from jarvis.calendar.client import CalendarClient
@@ -34,6 +35,7 @@ from jarvis.tasks.repository import TaskRepository, Tarefa
 # Dependências trocáveis nos testes.
 _repo: TaskRepository | None = None
 _cliente: CalendarClient | None = None
+_rotinas: rt.RotinasRepo | None = None
 _agora = None       # () -> datetime com fuso
 
 
@@ -42,6 +44,14 @@ def _repositorio() -> TaskRepository:
     if _repo is None:
         _repo = TaskRepository()
     return _repo
+
+
+def _repo_rotinas() -> rt.RotinasRepo:
+    """No mesmo banco das tarefas (refeito se o banco das tarefas mudar)."""
+    global _rotinas
+    if _rotinas is None or _rotinas.path != _repositorio().path:
+        _rotinas = rt.RotinasRepo(_repositorio().path)
+    return _rotinas
 
 
 def _client() -> CalendarClient:
@@ -93,9 +103,11 @@ class Dia:
 def dia_de_hoje(p: dict) -> Dia:
     agora = _agora_sp()
     repo = _repositorio()
+    eventos, aviso = _eventos(agora)
+    # §5.3: as recorrentes do dia nascem sozinhas (uma vez por dia; ver rotinas.gerar).
+    rt.gerar(agora.date(), repo, _repo_rotinas(), eventos, agora=agora)
     pontuadas = pr.ordenar(repo.listar_abertas(ate=agora.date()), agora,
                            p.get("contexto"), repo.nomes_projetos())
-    eventos, aviso = _eventos(agora)
     return Dia(agora, pontuadas, eventos, pl.montar(pontuadas, eventos, agora), aviso)
 
 
