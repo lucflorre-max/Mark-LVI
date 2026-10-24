@@ -98,9 +98,16 @@ def _minutos(intervalos) -> int:
 def montar(pontuadas: list[Pontuacao], eventos: list[Evento], agora: datetime,
            limite: datetime | None = None,
            duracoes: dict[int, int] | None = None,
-           ocupar: list[tuple[datetime, datetime]] | None = None) -> Plano:
+           ocupar: list[tuple[datetime, datetime]] | None = None,
+           obrigatorias_primeiro: bool = True,
+           menor_espaco: bool = False) -> Plano:
     """`duracoes` troca a duração de uma tarefa (id → minutos), para simular
-    um estouro sem alterar nada. `ocupar` reserva intervalos extras."""
+    um estouro sem alterar nada. `ocupar` reserva intervalos extras.
+    `obrigatorias_primeiro=False` encaixa na ordem recebida (a proposta da
+    sobrecarga já manda na ordem Essencial / Importante / Pode esperar).
+    `menor_espaco=True` põe cada tarefa no menor espaço onde ela cabe, em vez
+    do primeiro: desperdiça menos e cabe mais, mas não respeita "o mais cedo
+    possível". A sobrecarga usa para escolher o que fica no dia."""
     agora = agora.replace(second=0, microsecond=0)
     limite = limite or datetime.combine(agora.date(), FIM_DO_DIA, tzinfo=agora.tzinfo)
     duracoes = duracoes or {}
@@ -124,18 +131,20 @@ def montar(pontuadas: list[Pontuacao], eventos: list[Evento], agora: datetime,
             ocupado.append((hora, hora + dur(p)))
         else:
             flexiveis.append(p)
-    flexiveis.sort(key=lambda p: not obrigatoria(p, agora))   # estável: mantém a prioridade
+    if obrigatorias_primeiro:
+        flexiveis.sort(key=lambda p: not obrigatoria(p, agora))   # estável: mantém a prioridade
 
     livres = _livres(ocupado, agora, limite)
     for p in flexiveis:
         d = dur(p)
-        for i, (a, b) in enumerate(livres):
-            if b - a >= d:
-                blocos.append(Bloco(a, a + d, pont=p))
-                livres[i] = (a + d, b)
-                break
-        else:
+        cabem = [i for i, (a, b) in enumerate(livres) if b - a >= d]
+        if not cabem:
             plano.sem_espaco.append(p)
+            continue
+        i = min(cabem, key=lambda j: livres[j][1] - livres[j][0]) if menor_espaco else cabem[0]
+        a, b = livres[i]
+        blocos.append(Bloco(a, a + d, pont=p))
+        livres[i] = (a + d, b)
     plano.blocos = sorted(blocos, key=lambda b: (b.ini, b.fim))
     plano.livre_min = _minutos(livres)
     return plano
