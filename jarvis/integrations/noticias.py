@@ -146,6 +146,40 @@ def ultimas() -> list[dict]:
         return [dict(i) for i in _ultimas]
 
 
+MATERIA_MAX = 3000      # caracteres da matéria que vão para o modelo
+
+
+def escolher(ref, itens: list[dict]) -> dict | None:
+    """A notícia pelo número na última lista ('7') ou por palavras do título e
+    do resumo ('Linha 15', 'guindaste'). None quando não dá para saber qual."""
+    texto = str(ref or "").strip()
+    if texto.isdigit():
+        n = int(texto)
+        return itens[n - 1] if 1 <= n <= len(itens) else None
+    palavras = [p for p in _sem_acento(texto).split() if len(p) > 2]
+    if not palavras:
+        return None
+    notas = [(sum(p in _sem_acento(f"{i['title']} {i.get('snippet', '')}") for p in palavras), n)
+             for n, i in enumerate(itens)]
+    melhor, n = max(notas, default=(0, -1))
+    empatadas = sum(1 for nota, _ in notas if nota == melhor)
+    return itens[n] if melhor > 0 and empatadas == 1 else None
+
+
+def materia(item: dict) -> str:
+    """O texto da matéria, só os trechos sobre o assunto. '' se o site não
+    deixou ler. Lê a página por dentro: não abre o navegador."""
+    from jarvis.pesquisa import fontes, pesquisador
+    url = item.get("url") or ""
+    if not fontes.pode_ler(url):
+        return ""
+    texto = fontes.ler(url)
+    if not texto:
+        return ""
+    return pesquisador.trechos(texto, f"{item['title']} {item.get('snippet', '')}",
+                               limite=MATERIA_MAX)
+
+
 def formatar(itens: list[dict], cabecalho: str) -> str:
     """Texto para o modelo (e plano B do painel), no formato do Mark."""
     linhas = [cabecalho, ""]

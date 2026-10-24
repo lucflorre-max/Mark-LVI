@@ -34,5 +34,6 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `main.py` (briefing, `_jarvis_briefing_noticias`) | Notícias do briefing vêm dos feeds RSS (`jarvis/integrations/noticias.py`: Brasil, RS, Inter, economia, tecnologia); sem nenhum feed, a busca do Mark como antes | Fontes brasileiras escolhidas, com foto e sem gastar a cota do Gemini | M1B |
 | 23/10/2026 | `actions/web_search.py` (`web_search`) | Modos `search` e `research` passam por `jarvis/pesquisa/pesquisador.py`; a instrução `[RESEARCH_DONE]` vai fora do embrulho não confiável; se o pesquisador falhar, o caminho do Mark | A busca do Gemini estava sem cota (4 recusas por pesquisa), o DDG só trazia trechos e o modelo pesquisava até 6 vezes sem resposta | Pesquisador |
 | 23/10/2026 | `core/prompt.txt` ([EXECUTION]) | `web_search` uma vez por pergunta, consulta no idioma do usuário; com `[RESEARCH_DONE]`, responder na hora | Fim do loop de buscas reformuladas | Pesquisador |
+| 24/10/2026 | `core/prompt.txt` ([EXECUTION]) | Ler e contar (notícia, "fala mais") usa `jarvis_noticias` com `ler` ou `web_search`; `browser_control` só para ver ou abrir uma página | No teste por voz, "fala mais da dupla Grenal" abriu o navegador e pediu clique | M3 |
 
 As mudanças previstas que ainda faltam estão em `docs/auditoria-mark.md`. Sugerir ao upstream: achados 1 e 10.
