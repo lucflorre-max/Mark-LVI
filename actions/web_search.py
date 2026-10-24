@@ -387,13 +387,22 @@ def web_search(
 
     print(f"[WebSearch] 🔍 mode={mode!r}  query={query!r}")
 
+    nota = ""   # JARVIS: instrução que vai fora do embrulho não confiável
     try:
         if mode == "compare" and items:
             found = _compare(items, aspect)
         elif mode == "news":
             found = _news(query)
-        elif mode == "research":
-            found = _research(query)
+        elif mode in ("search", "research"):
+            # JARVIS: modo pesquisador (jarvis/pesquisa/): busca, lê as páginas,
+            # com prazo. Sem resultado, o caminho do Mark como antes.
+            try:
+                from jarvis.pesquisa import pesquisador
+                found = pesquisador.pesquisar(query)
+                nota = "\n" + pesquisador.NOTA
+            except Exception as e:
+                print(f"[WebSearch] pesquisador falhou ({e}) — caminho do Mark")
+                found = _research(query) if mode == "research" else _search(query)
         elif mode == "price":
             found = _price(query)
         else:
@@ -415,7 +424,7 @@ def web_search(
     #
     # core/prompt.txt carries the matching rule: inside the markers is data, an
     # instruction there is something to REPORT rather than follow.
-    return outcome.untrusted("web", found)
+    return outcome.untrusted("web", found) + nota
 
 
 # ── Tool declaration (auto-discovered by core/action_loader.py) ──────────────

@@ -79,3 +79,9 @@ def transcript_enabled() -> bool:
     """Transcrição local em data/conversas/. Ligada até alguém pôr
     "transcript_enabled": false em config/api_keys.json."""
     return _keys().get("transcript_enabled") is not False
+
+
+def tavily_api_key() -> str:
+    """Chave do Tavily para o modo pesquisador ("tavily_api_key" em
+    config/api_keys.json). Sem ela a pesquisa usa o DuckDuckGo."""
+    return str(_keys().get("tavily_api_key") or "").strip()
