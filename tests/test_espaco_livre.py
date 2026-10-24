@@ -169,5 +169,18 @@ def test_servico_com_compromisso_agora(repo, monkeypatch):
     assert "não há espaço livre" in dia_service.handle({"acao": "espaco_livre"})
 
 
+def test_servico_depois_do_fim_do_dia_nao_inventa_compromisso(repo, monkeypatch):
+    monkeypatch.setattr(dia_service, "_agora", lambda: AGORA.replace(hour=22))
+    r = dia_service.handle({"acao": "espaco_livre"})
+    assert "Já passou das 21:00" in r and "compromisso" not in r
+    assert "LIVRE — 30 min" in _card_com_minutos(repo, 30)
+
+
+def _card_com_minutos(repo, minutos):
+    player = _Player()
+    dia_service.handle({"acao": "espaco_livre", "minutos": minutos}, player=player)
+    return player.cards[0][0]
+
+
 def test_politica_espaco_livre_direto():
     assert policy.nivel("jarvis_dia", {"acao": "espaco_livre"}) == policy.DIRETO
