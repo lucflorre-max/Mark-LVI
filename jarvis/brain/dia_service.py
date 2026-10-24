@@ -213,6 +213,9 @@ def _espaco_livre(p: dict, player=None) -> str:
     except (TypeError, ValueError):
         minutos = None
     if minutos is None:
+        if dia.agora >= dia.plano.limite:
+            return (f"Já passou das {dia.plano.limite:%H:%M}, o fim do dia de planejamento. "
+                    "Pergunte quantos minutos ele tem, se quiser mesmo encaixar algo agora.")
         minutos = el.janela_agora(dia.plano)
         if minutos <= 0:
             return ("Agora há um compromisso ou tarefa de hora marcada em andamento; "
