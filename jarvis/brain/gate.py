@@ -19,10 +19,11 @@ import re
 import threading
 import time
 import unicodedata
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from jarvis.brain import policy
+from jarvis.brain import ler_sem_abrir, policy
 
 VOZ_TIMEOUT = 60.0     # segundos para o usuário responder
 # O fim da transcrição do PEDIDO pode chegar logo depois de ele ser guardado
@@ -50,6 +51,7 @@ class _PedidoVoz:
 
 
 _pedido: Optional[_PedidoVoz] = None
+_falas: deque[tuple[float, str]] = deque(maxlen=40)   # fala recente (ler_sem_abrir)
 _lock = threading.Lock()
 _relogio: Callable[[], float] = time.monotonic   # trocável nos testes
 
@@ -72,8 +74,17 @@ def resposta_afirmativa(texto: str) -> bool:
 def ouvir(texto: str) -> None:
     """Chamado pelo main.py a cada trecho transcrito da voz do usuário."""
     with _lock:
+        if texto:
+            _falas.append((_relogio(), texto))
         if _pedido is not None and texto:
             _pedido.ouvido.append((_relogio(), texto))
+
+
+def falas_recentes(janela: float = ler_sem_abrir.JANELA_SEG) -> list[str]:
+    """O que o usuário falou nos últimos `janela` segundos."""
+    agora = _relogio()
+    with _lock:
+        return [t for quando, t in _falas if agora - quando <= janela]
 
 
 def _mesma_chamada(a: dict, b: dict) -> bool:
@@ -115,6 +126,11 @@ def guard(name: str, args: dict, run: Callable[[], str],
     quando o serviço sabe dizer a mudança melhor (ex.: o compromisso já
     formatado em vez de "inicio: 2026-10-27T14:30").
     """
+    # Saber de algo é só leitura: pesquisar/abrir página sem ele pedir para VER
+    # vira leitura por dentro, sem navegador e sem clique (ler_sem_abrir.py).
+    lido = ler_sem_abrir.substituir(name, args, falas_recentes())
+    if lido is not None:
+        return lido
     nivel = policy.nivel(name, args)
     if nivel == policy.DIRETO:
         return None
@@ -144,3 +160,4 @@ def reset() -> None:
     global _pedido
     with _lock:
         _pedido = None
+        _falas.clear()

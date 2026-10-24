@@ -31,3 +31,7 @@ Se o Tavily falhar ou a cota acabar, a pesquisa volta sozinha para o DuckDuckGo.
 ## Testes
 
 `pytest tests/test_pesquisador.py`
+
+## Pesquisar sem abrir o navegador (24/10/2026)
+
+No teste por voz, "fala mais do jogo contra o Botafogo" virou `browser_control` search, que abre o navegador e pede o clique, mesmo com a regra no prompt. O portão (`jarvis/brain/gate.py`) agora troca, antes do banner, `browser_control` search pelo pesquisador e `go_to` pela leitura da página, ambos por dentro e sem clique (`jarvis/brain/ler_sem_abrir.py`). Se nos últimos 30 s o usuário falou em abrir, mostrar, navegador ou tela, o pedido segue como sempre, com o clique. Se a leitura falhar, também.
