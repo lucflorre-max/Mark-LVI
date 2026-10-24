@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from jarvis import config
+from jarvis.brain import espaco_livre as el
 from jarvis.brain import gate
 from jarvis.brain import linha_do_tempo as ldt
 from jarvis.brain import plano as pl
@@ -193,8 +194,26 @@ def _estourou(p: dict, player=None) -> str:
                      "nada foi alterado.")
 
 
+def _espaco_livre(p: dict, player=None) -> str:
+    dia = dia_de_hoje(p)
+    try:
+        minutos = int(p["minutos"]) if str(p.get("minutos") or "").strip() else None
+    except (TypeError, ValueError):
+        minutos = None
+    if minutos is None:
+        minutos = el.janela_agora(dia.plano)
+        if minutos <= 0:
+            return ("Agora há um compromisso ou tarefa de hora marcada em andamento; "
+                    "não há espaço livre. Pergunte quantos minutos ele tem, se quiser.")
+    enc = el.sugerir(minutos, dia.pontuadas, dia.agora)
+    _mostrar(player, el.card(enc, dia.agora))
+    return _resposta(el.para_fala(enc, dia.agora), dia.aviso,
+                     "O card está na tela. Sugira em uma frase e pergunte se ele quer "
+                     "começar. Nada foi alterado.")
+
+
 _HANDLERS = {"linha_do_tempo": _linha_do_tempo, "sobrecarga": _sobrecarga,
-             "estourou": _estourou}
+             "estourou": _estourou, "espaco_livre": _espaco_livre}
 ACOES = tuple(_HANDLERS)
 
 

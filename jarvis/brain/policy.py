@@ -65,7 +65,7 @@ _SAFE: dict[str, frozenset[str]] = {
     # compromisso fica fora daqui de propósito: pede o clique.
     "jarvis_agenda": frozenset({"ver"}),
     # Plano do dia (M3): só consulta e sugere, nada é gravado.
-    "jarvis_dia": frozenset({"linha_do_tempo", "sobrecarga", "estourou"}),
+    "jarvis_dia": frozenset({"linha_do_tempo", "sobrecarga", "estourou", "espaco_livre"}),
 }
 
 # Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
