@@ -66,6 +66,8 @@ _SAFE: dict[str, frozenset[str]] = {
     "jarvis_agenda": frozenset({"ver"}),
     # Plano do dia (M3): só consulta e sugere, nada é gravado.
     "jarvis_dia": frozenset({"linha_do_tempo", "sobrecarga", "estourou", "espaco_livre"}),
+    # Rotinas (M3): consultar e marcar hábito do dia rodam direto.
+    "jarvis_rotinas": frozenset({"rotinas", "habitos", "habito_registrar", "lembretes"}),
 }
 
 # Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
@@ -84,6 +86,9 @@ _VOZ: dict[str, frozenset[str]] = {
     }),
     # Preferência permanente só depois de um "sim" (CLAUDE.md).
     "jarvis_perfil": frozenset({"lembrar"}),
+    # Rotina e hábito são mudanças permanentes ("mudança real", documento-mestre §5.3).
+    "jarvis_rotinas": frozenset({"rotina_criar", "rotina_alterar", "rotina_pausar",
+                                 "habito_criar"}),
 }
 
 DIRETO, VOZ, CLIQUE = "direto", "voz", "clique"
@@ -95,6 +100,7 @@ _DEFAULT_ACTION = {
     "jarvis_perfil": "sugestoes",
     "jarvis_agenda": "ver",
     "jarvis_dia": "linha_do_tempo",
+    "jarvis_rotinas": "rotinas",
 }
 
 # As categorias do CLAUDE.md e onde cada uma está coberta. Documentação viva:
@@ -136,6 +142,7 @@ LABELS: dict[str, str] = {
     "jarvis_perfil":     "Lembrar do seu jeito de falar",
     "jarvis_agenda":     "Agenda",
     "jarvis_dia":        "Plano do dia",
+    "jarvis_rotinas":    "Rotinas e hábitos",
 }
 
 _ACTION_KEYS = ("action", "mode", "acao")
