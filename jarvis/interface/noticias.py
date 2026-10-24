@@ -6,15 +6,16 @@ escolhe a primeira que tem foto, baixa a imagem numa thread (a fala não
 espera) e manda tudo para `ui.show_news`. Sem foto, sem `show_news` ou com
 erro, cai no painel de texto de sempre (`ui.show_content`).
 
-Hoje as notícias vêm da busca do Mark (actions/web_search.py, DuckDuckGo).
-A fonte é trocável: o RSS planejado só precisa entregar a mesma lista.
+As notícias vêm dos feeds RSS (jarvis/integrations/noticias.py) no briefing
+e na ferramenta jarvis_noticias; a busca do Mark (web_search, DuckDuckGo) é
+o plano B e entrega a mesma lista.
 """
 
 from __future__ import annotations
 
 import threading
 
-MAX_ITENS = 6
+MAX_ITENS = 9
 MAX_BYTES = 3 * 1024 * 1024     # foto maior que isto não vale o download
 TIMEOUT = 4                     # segundos
 

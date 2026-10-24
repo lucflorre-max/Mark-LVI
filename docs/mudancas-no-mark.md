@@ -31,5 +31,6 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `actions/web_search.py` (`_ddg_news`, `_news`, `ultimas_noticias`) | Guarda o campo `image` do DDG e a lista da última busca de notícias | Card de notícias com foto; o Mark jogava a foto fora | M1B |
 | 23/10/2026 | `ui.py` (`_news_sig`, `_show_news`, `show_news`) | Card de notícias em HTML no painel de conteúdo, com a foto da principal como recurso do documento | Mostrar a foto da notícia relevante; a foto é baixada pelo JARVIS, o QTextEdit não acessa a rede | M1B |
 | 23/10/2026 | `main.py` (briefing e espelho do `web_search`) | Notícias vão para `jarvis_noticias.mostrar` em vez de `show_content`; sem foto, o texto de antes | Card com foto no briefing e quando o usuário pede notícias | M1B |
+| 23/10/2026 | `main.py` (briefing, `_jarvis_briefing_noticias`) | Notícias do briefing vêm dos feeds RSS (`jarvis/integrations/noticias.py`: Brasil, RS, Inter, economia, tecnologia); sem nenhum feed, a busca do Mark como antes | Fontes brasileiras escolhidas, com foto e sem gastar a cota do Gemini | M1B |
 
 As mudanças previstas que ainda faltam estão em `docs/auditoria-mark.md`. Sugerir ao upstream: achados 1 e 10.
