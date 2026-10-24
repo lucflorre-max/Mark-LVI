@@ -19,15 +19,21 @@ PLUGIN = {
         "essa análise quando ele disser 'não vou dar conta', 'estou "
         "sobrecarregado'. 'estourou' mostra o impacto de uma tarefa que passou "
         "do tempo ('ainda não terminei', 'vou demorar mais') e sugere mover, "
-        "encurtar ou adiar; pergunte quanto falta se ele não disse. Só sugere: "
-        "nada é alterado sem ele pedir."
+        "encurtar ou adiar; pergunte quanto falta se ele não disse. "
+        "'espaco_livre' sugere a pendência atrasada que cabe num tempo livre "
+        "('a reunião caiu', 'tenho 40 minutos'). Só sugere: nada é alterado "
+        "sem ele pedir."
     ),
     "parameters": {
         "type": "OBJECT",
         "properties": {
             "acao": {
                 "type": "STRING",
-                "description": "linha_do_tempo (padrão) | sobrecarga | estourou",
+                "description": "linha_do_tempo (padrão) | sobrecarga | estourou | espaco_livre",
+            },
+            "minutos": {
+                "type": "INTEGER",
+                "description": "espaco_livre: minutos livres, se ele disse (senão, até o próximo compromisso)",
             },
             "titulo": {"type": "STRING", "description": "estourou: a tarefa, como ele disse"},
             "tarefa_id": {"type": "INTEGER", "description": "estourou: id, quando houver mais de uma"},
