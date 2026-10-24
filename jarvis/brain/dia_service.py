@@ -14,6 +14,7 @@ para o modelo sai dentro do envelope de conteúdo não confiável (core/outcome)
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -22,11 +23,12 @@ from jarvis.brain import gate
 from jarvis.brain import linha_do_tempo as ldt
 from jarvis.brain import plano as pl
 from jarvis.brain import prioridade as pr
+from jarvis.brain import replanejar as rpl
 from jarvis.brain import sobrecarga as sc
 from jarvis.calendar import agenda
 from jarvis.calendar.client import CalendarClient
 from jarvis.integrations.google_auth import NaoAutorizado
-from jarvis.tasks.repository import TaskRepository
+from jarvis.tasks.repository import TaskRepository, Tarefa
 
 # Dependências trocáveis nos testes.
 _repo: TaskRepository | None = None
@@ -133,7 +135,66 @@ def _linha_do_tempo(p: dict, player=None) -> str:
         ldt.para_fala(linha), aviso, "Resuma em poucas palavras, começando pelo Agora.")
 
 
-_HANDLERS = {"linha_do_tempo": _linha_do_tempo, "sobrecarga": _sobrecarga}
+def _sem_acento(texto: str) -> str:
+    return unicodedata.normalize("NFKD", texto.lower()).encode("ascii", "ignore").decode()
+
+
+def _achar_tarefa(p: dict) -> tuple[Tarefa | None, list[Tarefa]]:
+    """(a tarefa, candidatas). Pelo id ou por parte do título; com mais de uma
+    candidata pelo título, nenhuma é escolhida."""
+    abertas = _repositorio().listar_abertas()
+    if str(p.get("tarefa_id") or "").strip():
+        try:
+            alvo = int(p["tarefa_id"])
+        except (TypeError, ValueError):
+            alvo = None
+        achada = next((t for t in abertas if t.id == alvo), None)
+        return achada, [achada] if achada else []
+    busca = _sem_acento(str(p.get("titulo") or "").strip())
+    if not busca:
+        return None, []
+    cand = [t for t in abertas if busca in _sem_acento(t.titulo)]
+    return (cand[0] if len(cand) == 1 else None), cand
+
+
+def _restante(p: dict) -> int | None | str:
+    """Minutos ditos; None para estimar ("não sei"); '' quando ainda não perguntou."""
+    valor = p.get("minutos_restantes")
+    if valor not in (None, ""):
+        try:
+            minutos = int(valor)
+        except (TypeError, ValueError):
+            return ""
+        return minutos if minutos > 0 else ""
+    return None if p.get("nao_sei") in (True, "true", "sim") else ""
+
+
+def _estourou(p: dict, player=None) -> str:
+    atual, candidatas = _achar_tarefa(p)
+    if atual is None:
+        if len(candidatas) > 1:
+            nomes = "; ".join(f"{t.titulo} [id {t.id}]" for t in candidatas[:5])
+            return (f"Mais de uma tarefa com esse nome: {nomes}. Pergunte qual é e "
+                    "chame de novo com tarefa_id.")
+        return ("Não achei essa tarefa entre as abertas. Pergunte ao usuário qual "
+                "tarefa estourou o tempo.")
+    restante = _restante(p)
+    if restante == "":
+        # §5.2: começou e não terminou → perguntar quanto falta.
+        return (f"Nada foi calculado ainda. Pergunte ao usuário quanto falta para "
+                f"terminar “{atual.titulo}” (em minutos). Se ele não souber, chame de "
+                "novo com nao_sei=true e eu estimo.")
+    dia = dia_de_hoje(p)
+    rp = rpl.analisar(atual, restante, dia.pontuadas, dia.eventos, dia.agora)
+    _mostrar(player, rpl.card(rp))
+    return _resposta(rpl.para_fala(rp), dia.aviso,
+                     "O card está na tela. Diga o impacto em uma frase e ofereça as "
+                     "sugestões; pergunte qual ele prefere. Não diga que mudou nada: "
+                     "nada foi alterado.")
+
+
+_HANDLERS = {"linha_do_tempo": _linha_do_tempo, "sobrecarga": _sobrecarga,
+             "estourou": _estourou}
 ACOES = tuple(_HANDLERS)
 
 

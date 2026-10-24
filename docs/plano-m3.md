@@ -23,7 +23,7 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.2 e 5.3
 | 1 | Motor de prioridade: prazo + impacto + contexto + esforço | **feita** (23/10/2026): `jarvis/brain/prioridade.py` |
 | 2 | Linha do tempo Agora / Depois / Se der tempo no card | **código e testes prontos** (23/10/2026): `plano.py` encaixa no tempo livre, `linha_do_tempo.py` separa as faixas e faz o card; ferramenta `jarvis_dia` ação `linha_do_tempo`; falta o teste por voz |
 | 3 | Sobrecarga: Essencial / Importante / Pode esperar e proposta de dia realista | **código e testes prontos** (23/10/2026): `jarvis/brain/sobrecarga.py`; a linha do tempo já avisa e propõe; ação `sobrecarga`; falta o teste por voz |
-| 4 | Tarefa que estourou: impacto e sugestão de mover, encurtar ou adiar, sem aplicar | |
+| 4 | Tarefa que estourou: impacto e sugestão de mover, encurtar ou adiar, sem aplicar | **código e testes prontos** (23/10/2026): `jarvis/brain/replanejar.py`; ação `estourou` pergunta quanto falta (ou estima com `nao_sei`); falta o teste por voz |
 | 5 | Espaço livre: sugerir a pendência atrasada que couber | |
 | 6 | Recorrentes automáticas, hábitos e metas semanais, lembretes conforme a prioridade sem excesso | |
 
@@ -37,4 +37,5 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.2 e 5.3
 - **Faixas:** Agora = em andamento ou começando nos próximos 15 min; Depois = resto do dia (compromissos e tarefas com prazo até hoje); Se der tempo = sem prazo para hoje e o que não coube. Sem nada obrigatório agora, a primeira opcional sobe para Agora.
 - **Sobrecarga** = alguma tarefa com prazo até hoje não coube. Essencial: prazo até hoje e prioridade alta, ou hora marcada hoje (não baixa). Pode esperar: prioridade baixa, ou sem prazo para hoje (a não ser alta). Importante: o resto.
 - **Proposta realista:** escolhe o que fica encaixando na ordem das classes, cada tarefa no menor espaço onde cabe (evita que brechas sobrem e uma importante fique de fora); depois refaz os horários o mais cedo possível. O que não cabe tem sugestão de adiar para amanhã. Nada é gravado: o usuário decide.
+- **Estouro:** o usuário diz quanto falta; sem resposta, estimativa de metade da duração prevista (múltiplos de 15 min). Impacto = o resto do dia sem e com o tempo extra: compromissos e horas marcadas que batem, tarefas que deixam de caber, tarefas que começam mais tarde. Sugestões: compromisso que bate → encurtar a atual até ele ou mover (agenda: avisa que pede confirmação); tarefa perdida que pode esperar → adiar; perdida importante/essencial → simula encurtar ou adiar uma de classe abaixo, ou encurtar a atual, e sugere a primeira que faz caber; senão, adiar a perdida.
 - **Card:** painel de conteúdo do Mark (como nas M1B/M2), com o tempo que sobra depois do plano.
