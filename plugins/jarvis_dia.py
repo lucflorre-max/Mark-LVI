@@ -14,12 +14,15 @@ PLUGIN = {
         "contexto e esforço. 'linha_do_tempo' mostra no card o Agora, o Depois "
         "e o Se der tempo, juntando tarefas e compromissos. Use quando ele "
         "perguntar 'o que faço agora', 'como está meu dia', 'qual a "
-        "prioridade'. Só sugere: nada é alterado sem ele pedir."
+        "prioridade'. Se o dia não couber, ela já avisa e propõe um dia "
+        "realista (Essencial / Importante / Pode esperar). 'sobrecarga' faz "
+        "essa análise quando ele disser 'não vou dar conta', 'estou "
+        "sobrecarregado'. Só sugere: nada é alterado sem ele pedir."
     ),
     "parameters": {
         "type": "OBJECT",
         "properties": {
-            "acao": {"type": "STRING", "description": "linha_do_tempo (padrão)"},
+            "acao": {"type": "STRING", "description": "linha_do_tempo (padrão) | sobrecarga"},
             "contexto": {
                 "type": "STRING",
                 "description": "Onde ele está ou o que está fazendo, se disse (ex.: trabalho, casa)",
