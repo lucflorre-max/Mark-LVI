@@ -85,6 +85,7 @@ from jarvis                    import config as jarvis_config  # JARVIS: flags d
 from jarvis.memory             import transcript as jarvis_transcript  # JARVIS: data/conversas/
 from jarvis.memory             import perfil as jarvis_perfil  # JARVIS: data/perfil.json
 from jarvis.interface          import noticias as jarvis_noticias  # JARVIS: card com foto
+from jarvis.integrations       import noticias as jarvis_rss  # JARVIS: notícias por RSS
 from core                      import audio_devices
 from core.action_loader        import discover_actions
 from core.echo                 import EchoGuard
@@ -1938,8 +1939,16 @@ class JarvisLive:
 
         # Start fetching news immediately — runs in parallel while phase 1 plays
         loop = asyncio.get_event_loop()
-        # JARVIS: notícias do Brasil no briefing (em inglês vinham as dos EUA)
-        news_future = loop.run_in_executor(None, _fetch_news_sync, jarvis_config.BRIEFING_NOTICIAS)
+        # JARVIS: notícias do briefing pelos feeds RSS (jarvis/integrations/noticias.py);
+        # sem nenhum feed, a busca do Mark em pt-BR (em inglês vinham as dos EUA)
+        def _jarvis_briefing_noticias():
+            try:
+                texto = jarvis_rss.briefing()
+            except Exception as e:
+                print(f"[JARVIS RSS] briefing: {type(e).__name__}")
+                texto = ""
+            return texto or _fetch_news_sync(jarvis_config.BRIEFING_NOTICIAS)
+        news_future = loop.run_in_executor(None, _jarvis_briefing_noticias)
 
         await asyncio.sleep(0.3)
         if not self.session:
@@ -2024,7 +2033,8 @@ class JarvisLive:
                 if not failed:
                     # Show on UI content panel immediately
                     # JARVIS: card com a foto da principal; sem foto, o texto de antes
-                    jarvis_noticias.mostrar(self.ui, "NOTÍCIAS — Brasil hoje", news_text)
+                    jarvis_noticias.mostrar(self.ui, "NOTÍCIAS — hoje", news_text,
+                                            itens=jarvis_rss.ultimas() or None)
 
                     p2 = (
                         f"[BRIEFING] Here are today's top news headlines:\n{news_text}\n\n"
