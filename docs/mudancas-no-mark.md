@@ -28,5 +28,8 @@ Use isto ao atualizar o `upstream`: são os pontos onde pode haver conflito.
 | 23/10/2026 | `ui.py:5649` | Botão "HUD: ANIMATED FACE / REACTOR CORE" escondido | Sem opção de voltar ao rosto pela interface | M1B |
 | 23/10/2026 | `ui.py:843-860, 915-919` | Repouso (ouvindo, sem falar, sem mudo): só núcleo, hora e "Como posso ajudar, senhor?"; sem status em inglês e sem barra de áudio | Meta 1B, tarefa 1 | M1B tarefa 1 |
 | 23/10/2026 | `.gitignore` (Secrets) | `config/trello.json` ignorado | Chave e token do Trello do JARVIS | M2 tarefa 4 |
+| 23/10/2026 | `actions/web_search.py` (`_ddg_news`, `_news`, `ultimas_noticias`) | Guarda o campo `image` do DDG e a lista da última busca de notícias | Card de notícias com foto; o Mark jogava a foto fora | M1B |
+| 23/10/2026 | `ui.py` (`_news_sig`, `_show_news`, `show_news`) | Card de notícias em HTML no painel de conteúdo, com a foto da principal como recurso do documento | Mostrar a foto da notícia relevante; a foto é baixada pelo JARVIS, o QTextEdit não acessa a rede | M1B |
+| 23/10/2026 | `main.py` (briefing e espelho do `web_search`) | Notícias vão para `jarvis_noticias.mostrar` em vez de `show_content`; sem foto, o texto de antes | Card com foto no briefing e quando o usuário pede notícias | M1B |
 
 As mudanças previstas que ainda faltam estão em `docs/auditoria-mark.md`. Sugerir ao upstream: achados 1 e 10.
