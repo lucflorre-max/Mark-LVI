@@ -64,6 +64,8 @@ _SAFE: dict[str, frozenset[str]] = {
     # Agenda: consulta roda direto (documento-mestre §11). Criar ou alterar
     # compromisso fica fora daqui de propósito: pede o clique.
     "jarvis_agenda": frozenset({"ver"}),
+    # Plano do dia (M3): só consulta e sugere, nada é gravado.
+    "jarvis_dia": frozenset({"linha_do_tempo"}),
 }
 
 # Sub-ações que pedem só um "sim" falado em vez do clique (escolha do usuário
@@ -92,6 +94,7 @@ _DEFAULT_ACTION = {
     "jarvis_tarefas": "criar",
     "jarvis_perfil": "sugestoes",
     "jarvis_agenda": "ver",
+    "jarvis_dia": "linha_do_tempo",
 }
 
 # As categorias do CLAUDE.md e onde cada uma está coberta. Documentação viva:
@@ -132,6 +135,7 @@ LABELS: dict[str, str] = {
     "jarvis_tarefas":    "Tarefas",
     "jarvis_perfil":     "Lembrar do seu jeito de falar",
     "jarvis_agenda":     "Agenda",
+    "jarvis_dia":        "Plano do dia",
 }
 
 _ACTION_KEYS = ("action", "mode", "acao")

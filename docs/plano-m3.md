@@ -20,8 +20,8 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.2 e 5.3
 
 | # | Tarefa | Situação |
 | --- | --- | --- |
-| 1 | Motor de prioridade: prazo + impacto + contexto + esforço | |
-| 2 | Linha do tempo Agora / Depois / Se der tempo no card | |
+| 1 | Motor de prioridade: prazo + impacto + contexto + esforço | **feita** (23/10/2026): `jarvis/brain/prioridade.py` |
+| 2 | Linha do tempo Agora / Depois / Se der tempo no card | **código e testes prontos** (23/10/2026): `plano.py` encaixa no tempo livre, `linha_do_tempo.py` separa as faixas e faz o card; ferramenta `jarvis_dia` ação `linha_do_tempo`; falta o teste por voz |
 | 3 | Sobrecarga: Essencial / Importante / Pode esperar e proposta de dia realista | |
 | 4 | Tarefa que estourou: impacto e sugestão de mover, encurtar ou adiar, sem aplicar | |
 | 5 | Espaço livre: sugerir a pendência atrasada que couber | |
@@ -33,3 +33,6 @@ Fonte: pedido do usuário em 23/10/2026 e o documento-mestre (seções 5.2 e 5.3
 - **Contexto = onde o usuário está ou o que está fazendo** ("trabalho", "casa", nome de projeto), dito na conversa. A tarefa combina quando o projeto ou a descrição dela tem essa palavra. Sem contexto dito, o fator fica neutro para todas.
 - **Esforço = duração estimada.** Tarefa curta sobe um pouco (cabe em brechas); sem duração conta como 30 min.
 - **Pesos:** prazo 40 %, impacto 35 %, esforço 15 %, contexto 10 %. Atrasada tem o fator de prazo máximo.
+- **Plano do dia:** de agora até as 21h (o mesmo limite das sugestões da M2), menos os compromissos com hora do Google Calendar. Tarefa com hora marcada hoje fica fixa; as outras entram em ordem de prioridade no primeiro espaço onde cabem, primeiro as obrigatórias (prazo até hoje). Sem a agenda do Google, o plano sai só com as tarefas e avisa.
+- **Faixas:** Agora = em andamento ou começando nos próximos 15 min; Depois = resto do dia (compromissos e tarefas com prazo até hoje); Se der tempo = sem prazo para hoje e o que não coube. Sem nada obrigatório agora, a primeira opcional sobe para Agora.
+- **Card:** painel de conteúdo do Mark (como nas M1B/M2), com o tempo que sobra depois do plano.
